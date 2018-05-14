@@ -1,0 +1,44 @@
+#login_form{
+    height: 300px;
+}
+
+.login_label{
+    width:70px;
+    line-height: 32px;
+}
+
+.login_input{
+    background-color: #4b535b;
+    
+    border: 1px solid #1e2226;
+    border-radius: 5px;
+    height:40px;
+    outline:none;
+}
+
+.login_button{
+    border:none;
+    padding:15px;
+
+    cursor:pointer;
+    background-color: #428bca;
+    color:white;
+    transition: background-color 500ms;
+    
+    border-radius: 5px;
+
+    font-size: 13pt;
+}
+
+.login_button:hover{
+    background-color: white;
+    color:black
+}
+
+.flash{
+    margin-bottom: 130px;
+}
+
+#logout{
+    cursor: pointer;
+}

@@ -1,0 +1,213 @@
+body {
+  /*padding: 50px;*/
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  /*background-color: #3E4551;*/
+}
+
+.dataTables_filter input, .login_input{
+  background-color: #343a40;
+}
+
+#daily{
+  font-weight: bold;
+  text-decoration: underline;
+
+  /*color: white;*/
+}
+
+#weekly{
+  font-weight: bold;
+  text-decoration: underline;
+  /*color: white;*/
+}
+
+#ytd{
+  font-weight: bold;
+  text-decoration: underline;
+  /*color: white;*/
+}
+
+a {
+  color: #00B7FF;
+}
+
+.week_cont{
+  height:70px;
+  margin-bottom: 50px;
+}
+
+.week_label{
+  margin-top:10px;
+  font-size: 12pt;
+}
+
+#books_table th{
+  color:white;
+  text-decoration:none;
+  
+}
+
+#books_table a{
+  cursor: pointer;
+}
+
+.date_view{
+  display: none;
+}
+
+.overlay{
+  visibility: hidden;
+  position: fixed;
+  top:0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background:#000000b3;
+  transition: opacity 500ms;
+  opacity: 0;
+}
+
+.overlay:target{
+  visibility: visible;
+  opacity: 1;
+  z-index: 2;
+}
+
+.popup{
+  width:300px;
+  height: 520px;
+  top:20%;
+  left:38%;
+  transition: all 5s ease-in-out;
+  position: relative;
+}
+
+.user_popup{
+  width: 350px; 
+  height: 370px;
+  top:20%;
+  left:38%;
+  transition: all 5s ease-in-out;
+  position: relative;
+}
+
+.close{
+  position: absolute;
+  top:20px;
+  right:20px;
+  font-size: 13pt;
+  transition: all 200ms;
+}
+
+.edit_content{
+  position: absolute;
+  top:50px;
+}
+
+/*#edit_form input{
+  width:80px;
+
+  margin-left: 20px;
+}*/
+
+#edit_form label{
+  margin-top:10px;
+}
+
+.input_div{
+  width: 270px;
+  border-radius: 7px;
+  background-color: #393e44;
+  border: 2px solid #2d3035;
+  outline:none;
+
+  color:white;
+}
+
+.exportButton{
+  background-color: #343a40;
+}
+
+.edit_button{
+  border:1px solid #2d3035;
+  padding:10px;
+  margin-top:15px;
+  cursor: pointer;
+  background-color: #ff3842;
+  color:white;
+  transition: all 500ms ease-in-out;
+
+  margin-top: 10px;
+}
+
+.edit_button:hover{
+  background-color: white;
+  color:black;
+}
+
+a:link {
+  text-decoration: none;
+  color:inherit;
+  cursor: pointer;
+}
+
+a:visited {
+  text-decoration: none;
+  color:inherit;
+  cursor: pointer;
+}
+
+a:hover {
+  text-decoration: none;
+  color:inherit;
+  cursor: pointer;
+}
+
+a:active {
+  text-decoration: none;
+  color:inherit;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background-color: #393e44;
+    -webkit-appearance: none;
+}
+
+#option{
+  width: 120px;
+  min-height: 70px;
+  position: fixed;
+  top:0;
+  right:0;
+
+  opacity: 0.9;
+}
+
+#option a{
+  padding: 12px 0;
+}
+
+.options{
+  cursor: pointer;
+  transition: background-color 500ms;
+}
+
+.options label{
+  padding: 10px 0;
+  pointer-events: none;
+}
+
+.options:hover{
+  background-color: #525252;
+}
+
+.pos_select{
+  background-color: #4b535b;
+  border-radius: 5px;
+
+  height: 40px;
+
+  border:1px solid #1e2226;
+  outline:none;
+}

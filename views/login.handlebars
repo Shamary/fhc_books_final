@@ -1,0 +1,23 @@
+<div class="flash">
+    {{#if messages.alert}}
+        <label class="text-white bg-danger text-center w-100 p-3">{{messages.alert}}</label>
+    {{/if}}
+</div>
+<div class="container-fluid">
+    <div id="login_form" class="col-sm-3 bg-dark offset-sm-4 mt-5">
+        <h3 class="text-white text-center">Sign In</h3>
+        <form method="POST" action="">
+            <br><br>
+            <div class="row text-white mt-3">
+                <!--<label class="offset-sm-1 login_label">Username</label>-->
+                <input type="text" class="login_input offset-sm-1 col-sm-10 text-white" name="username" placeholder="username" required/>
+            </div>
+            <div class="row text-white mt-2">
+                <!--<label class="offset-sm-1 login_label">Password</label>-->
+                <input type="password" class="login_input offset-sm-1 col-sm-10 text-white" name="password" placeholder="password" required/>
+            </div>
+            
+            <input type ="submit" value="Login" class="login_button mt-5 offset-sm-0 col-sm-12"/>
+        </form>
+    </div>
+</div>

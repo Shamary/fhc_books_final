@@ -1,0 +1,169 @@
+<div class="container-fluid home">
+    <!---week selection--->
+    <div class="row">
+        <div class="bg-dark text-white col-sm-1 week_cont">
+            <label class="week_label offset-sm-1">Week #</label>
+            <form id="sel_form" method="POST" action="/books_update">
+                <select name="week" id="sel_week" class="offset-sm-1 bg-secondary text-white">
+                    {{#each weeks}}
+                        <option value={{this}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </form>
+        </div>
+        <!--
+        <div class="offset-sm-10 col-sm-1 text-white dropdown">
+            <button type="button" class="btn bg-dark " data-toggle="dropdown">
+                	<div class="stroke"></div>
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="#">Add User</a>
+                <label id="logout" class="dropdown-item">Logout</label>
+            </div>
+        </div>-->
+    </div>
+    <!---Drop Down Options--->
+    <nav class="navbar navbar-dark bg-dark text-white" id="option">
+            <button class="navbar-toggler offset-sm-2" type="button" data-toggle="collapse" data-target="#menu" 
+            aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                {{#if manager}}
+                    <div class="row mt-3 options">
+                        <a class="row offset-sm-3" href="#add_user">Add User</a>
+                    </div>
+                {{/if}}
+                <div id="logout" class="row options">
+                    <label class="row offset-sm-3">Logout</label>
+                </div>
+            </div>
+    </nav>
+    <!---Edit Column--->
+    <div id="popup_trigger" class="overlay text-white">
+        <div class="popup bg-dark">
+            <a class="close" href="#"><!--&times;-->X</a>
+            <div><h5 class="text-white" id="day"></h5></div>
+            <div class="offset-sm-1 edit_content">
+                <form id="edit_form" method="POST" action="/update_db">
+                    <input id="day0" type="hidden" name="day" value=""/>
+                    <input id="week" type="hidden" name="week" value=""/>
+                    <input id="rtype" type="hidden" name="rtype" value="0">
+                    
+                    <div id="date_label" class="row offset-sm-4">
+                        <label>Date</label>
+                    </div>
+                    <div class="row">
+                        <input id="date" type="date" name="date" class="input_div" min="2018-01-01" required/>
+                    </div>
+                    
+                    <div class="row offset-sm-4">
+                        <label>Loans</label>
+                    </div>
+                    <div class="row">
+                        <input id="loans" type="number" name="loans" class="input_div" step="0.01" min="0" required/>
+                    </div>
+                    <div class="row offset-sm-4">
+                        <label>Deposits</label>
+                    </div>
+                    <div class="row">
+                        <input id="deposits" type="number" name="deposits" class="input_div" step="0.01" min="0" required/>
+                    </div>
+                    <div class="row offset-sm-4">
+                        <label>Debit Cards</label>
+                    </div>
+                    <div class="row">
+                        <input id="cards" type="number" name="debit_cards" class="input_div" step="0.01" min="0" required/>
+                    </div>
+                    <div class="row offset-sm-4">
+                        <label>Membership</label>
+                    </div>
+                    <div class="row">
+                        <input id="membership" type="number" name="membership" class="input_div" step="0.01" min="0" required/>
+                    </div>
+                    <div class="row offset-sm-4">
+                        <label>iTransact</label>
+                    </div>
+                    <div class="row">
+                        <input id="iTransact" type="number" name="itransact" class="input_div" step="0.01" min="0" required/>
+                    </div>
+                    <div class="row offset-sm-4">
+                        <label>FIP</label>
+                    </div>
+                    <div class="row">
+                        <input id="fip" type="number" name="fip" class="input_div" step="0.01" min="0" required/>
+                    </div>
+                    <input type="submit" value="Update" class="offset-sm-4 edit_button"/>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!---ADD USER--->
+    <div id="add_user" class="overlay text-white">
+        <div id="add_result">
+            {{#if messages.add_fail}}
+                <label class="text-white bg-danger text-center w-100 p-3">{{messages.add_fail}}</label>
+            {{else if messages.add_success}}
+                <label class="text-white bg-success text-center w-100 p-3">{{messages.add_success}}</label>
+            {{/if}}
+        </div>
+        <div class="user_popup bg-dark">
+            <a class="close" href="#">X</a>
+            <form id="add_user_form" action="/register" method="POST">
+            <br>
+                <div class="row mt-5">
+                    <input class="login_input offset-sm-1 col-sm-10 text-white" type="text" name="username" placeholder="username" maxlength="30" required/>
+                </div>
+                <div class="row mt-3">
+                    <select class="offset-sm-1 col-sm-10 pos_select text-white" name="position" required>
+                        <option>bsr</option>
+                        <option>manager</option>
+                    </select>
+                </div>
+                <div class="row mt-3">
+                    <input class="login_input offset-sm-1 col-sm-10 text-white" type="password" name="password" placeholder="password" required/>
+                </div>
+                <div class="row mt-3">
+                    <input class="login_input offset-sm-1 col-sm-10 text-white" type="password" name="confirm_password" placeholder="confirm password" required/>
+                </div>
+                <input class="login_button col-sm-11 mt-4" type="submit" value="Add User" style="margin-left:15px"/>
+            </form>
+            <!--<button id="add_user_btn" class="login_button col-sm-11 mt-4" style="margin-left:15px">Add User</button>-->
+        </div>
+    </div>
+    <!--
+    <div class="row">
+        <h4 id="daily" class="offset-sm-3">DAILY</h4>
+        <h4 id="weekly" class="offset-sm-3">WEEKLY</h4>
+        <h4 id="ytd" class="offset-sm-2">YTD</h4>
+    </div>-->
+
+    <!---Table-->
+    <table id="books_table" class="table table-striped table-dark text-center">
+        <thead>
+            <tr>
+                <th></th>
+                <th><span id="mdate">{{mdate}}</span><br> Mon <a href="#popup_trigger">&#x270E;</a></th>
+                <th><span id="tdate">{{tdate}}</span><br> Tue <a href="#popup_trigger">&#x270E;</a></th>
+                <th><br><span id="wdate">{{wdate}}</span><br> Wed <a href="#popup_trigger">&#x270E;</a></th>
+                <th><span id="thdate">{{thdate}}</span><br> Thur <a href="#popup_trigger">&#x270E;</a></th>
+                <th><span id="fdate">{{fdate}}</span><br> Fri <a href="#popup_trigger">&#x270E;</a></th>
+                <th>Actual {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
+                <th>Target {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
+                <th><span id="weekly_date">{{fdate}}</span><br> Difference {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
+                <th>Actual {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
+                <th>Target {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
+                <th><span id="ytd_date"></span><br> Difference {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <div class="row">
+                    <h4 id="daily" class="offset-sm-3">DAILY</h4>
+                    <h4 id="weekly" class="offset-sm-3">WEEKLY</h4>
+                    <h4 id="ytd" class="offset-sm-2">YTD</h4>
+                </div>
+            </tr>
+        </tbody>
+    </table>
+</div>
