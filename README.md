@@ -9,14 +9,17 @@
 3) setup environment variables:
     located at /config/environment.js
 
-4) start the program
-   ***commands***
-i) start: > npm start
-ii) restart: > npm restart
-iii) stop: > npm stop
-iv) server logs: > pm2 logs
+****start the program****
 
-5) Signin with default credentials:
+4) start: > npm start
+
+5) restart: > npm restart
+
+6) stop: > npm stop
+
+7) server logs: > pm2 logs
+
+8) Signin with default credentials:
     username: admin
     password: 1234
 
