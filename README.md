@@ -11,10 +11,10 @@
 
 4) start the program
    ***commands***
-4a) start: > npm start
-4b) restart: > npm restart
-4c) stop: > npm stop
-4d) server logs: > pm2 logs
+i) start: > npm start
+ii) restart: > npm restart
+iii) stop: > npm stop
+iv) server logs: > pm2 logs
 
 5) Signin with default credentials:
     username: admin
