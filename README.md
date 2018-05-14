@@ -3,9 +3,8 @@
 1) Install dependencies:
     > npm install
 
-2) Setup database:
-    run > source path/db.sql 
-    in mysql
+2) Setup database(in mysql):
+    > source db.sql 
 
 3) setup environment variables:
     located at /config/environment.js
