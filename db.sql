@@ -1,5 +1,17 @@
+DROP DATABASE books_db;
 CREATE DATABASE IF NOT EXISTS books_db;
 use books_db;
+
+CREATE TABLE IF NOT EXISTS user
+(
+    _username varchar(30) NOT NULL PRIMARY KEY,
+    _password varchar(60) NOT NULL,
+    position ENUM('bsr','manager') NOT NULL
+);
+
+INSERT IGNORE INTO user VALUES("admin","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","manager");
+INSERT IGNORE INTO user VALUES("bsr1","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","bsr");
+
 
 CREATE TABLE IF NOT EXISTS books
 (
@@ -13,7 +25,7 @@ CREATE TABLE IF NOT EXISTS books
     iTransact int NOT NULL,
     FIP int NOT NULL,
     user varchar(30) NOT NULL,
-    CONSTRAINT FOREIGN KEY user REFERENCES user(_username) ON DELETE CASCADE
+    CONSTRAINT FOREIGN KEY (user) REFERENCES user(_username) ON DELETE CASCADE
 );
 
 
@@ -30,7 +42,8 @@ CREATE TABLE IF NOT EXISTS books_weekly
     weekly_actual float(14,2),
     weekly_target float(14,2),
     weekly_difference float(14,2),
-    CONSTRAINT FOREIGN KEY user REFERENCES user(_username) ON DELETE CASCADE/*,
+    user varchar(30) NOT NULL,
+    CONSTRAINT FOREIGN KEY (user) REFERENCES user(_username) ON DELETE CASCADE/*,
     CONSTRAINT FOREIGN KEY(wweek) references books(week) ON DELETE CASCADE*/
 );
 
@@ -41,20 +54,10 @@ CREATE TABLE IF NOT EXISTS books_ytd
     ytd_actual float(14,2),
     ytd_target float(14,2),
     ytd_difference float(14,2),
-    CONSTRAINT FOREIGN KEY user REFERENCES user(_username) ON DELETE CASCADE/*,
+    user varchar(30) NOT NULL,
+    CONSTRAINT FOREIGN KEY (user) REFERENCES user(_username) ON DELETE CASCADE/*,
     CONSTRAINT FOREIGN KEY(yweek) references books(week) ON DELETE CASCADE*/
 );
-
-CREATE TABLE IF NOT EXISTS user
-(
-    _username varchar(30) NOT NULL PRIMARY KEY,
-    _password varchar(60) NOT NULL,
-    position ENUM('bsr','manager') NOT NULL
-);
-
-INSERT IGNORE INTO user VALUES("admin","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","manager");
-INSERT IGNORE INTO user VALUES("bsr1","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","bsr");
-
 
 CREATE TABLE IF NOT EXISTS manager_table
 (

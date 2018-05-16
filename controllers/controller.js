@@ -5,6 +5,8 @@ var date= require("date-and-time");
 const WEEKLY_ACTUAL=1, WEEKLY_TARGET =2, WEEKLY_DIFF=3
       YTD_ACTUAL = 4, YTD_TARGET = 5, YTD_DIFF = 6;
 
+var o_user="";
+
 var getDay = function(result,day)
 {
     let i=0;
@@ -130,7 +132,108 @@ var runAction=function(result,action,type)
     
 }
 
-var handleResult= function(result)
+var sums= function(days)
+{
+    let i=0;
+    let sum=0;
+    for(i=0;i<days.length;i++)
+    {
+        if(days[i]!=null)
+        {
+            sum+=days[i];
+        }
+    }
+
+    return sum;
+}
+
+var diff= function(actual,target)
+{
+    let diff= -actual;
+    if(target!=null)
+    {
+        diff= target - actual;
+    }
+
+    return diff;
+}
+
+var write_to_DB = function(fields,type,week,user)
+{
+    let sql=``;
+    let table={2:"books_weekly",3:"books_ytd"};
+    let cols={2:"ftype_week,wweek,weekly_actual,weekly_difference,user",
+              3:"ftype_ytd,yweek,ytd_actual,ytd_difference,user"};
+
+    let col=cols[type].split(",");
+    console.log("cols = "+col[0]+col[1]+col[2]+col[3]+col[4]);
+
+    sql=`INSERT INTO ${table[type]}(${col[0]},${col[1]},${col[2]},${col[3]},${col[4]}) VALUES ?`;
+    let values=[["loans",week,fields.loans_actual,fields.loans_diff,user],
+                ["deposits",week,fields.deposits_actual,fields.deposits_diff,user],
+                ["debit_cards",week,fields.cards_actual,fields.cards_diff,user],
+                ["membership",week,fields.members_actual,fields.members_diff,user],
+                ["iTransact",week,fields.itransact_actual,fields.itransact_diff,user],
+                ["FIP",week,fields.fip_actual,fields.fip_diff,user]];
+
+    db.query(sql,[values],function(err){
+        if(err)
+        {
+            throw err;
+        }
+
+        console.log("Done write");
+    });
+}
+
+var handleAuto = function(result,week)
+{
+    let monday=runAction(result[getDay(result,1)]);//result[getDay(result,1)];
+    let tuesday=runAction(result[getDay(result,2)]);
+    let wednesday=runAction(result[getDay(result,3)]);
+    let thursday=runAction(result[getDay(result,4)]);
+    let friday=runAction(result[getDay(result,5)]);
+    
+    ///weekly actual
+    let loans_sum=sums([monday.loans,tuesday.loans,wednesday.loans,thursday.loans,friday.loans]);
+    let deposits_sum=sums([monday.deposits,tuesday.deposits,wednesday.deposits,thursday.deposits,friday.deposits]);
+    let cards_sum=sums([monday.debit_cards,tuesday.debit_cards,wednesday.debit_cards,thursday.debit_cards,friday.debit_cards]);
+    let members_sum=sums([monday.membership,tuesday.membership,wednesday.membership,thursday.membership,friday.membership]);
+    let itransact_sum=sums([monday.iTransact,tuesday.iTransact,wednesday.iTransact,thursday.iTransact,friday.iTransact]);
+    let fip_sum=sums([monday.FIP,tuesday.FIP,wednesday.FIP,thursday.FIP,friday.FIP]);
+
+
+    let weekly = runAction(result,null,2);
+    let ytd = runAction(result,null,3);
+
+    //weekly difference
+    let loans_diff=diff(loans_sum,weekly.weekly_target);
+    let deposits_diff=diff(deposits_sum,weekly.weekly_target);
+    let cards_diff=diff(cards_sum,weekly.weekly_target);
+    let members_diff=diff(members_sum,weekly.weekly_target);
+    let itransact_diff=diff(itransact_sum,weekly.weekly_target);
+    let fip_diff=diff(fip_sum,weekly.weekly_target);
+
+    let weekly_data_for_DB =
+    {
+        loans_actual:loans_sum,
+        loans_diff:loans_diff,
+        deposits_actual:deposits_sum,
+        deposits_diff:deposits_diff,
+        cards_actual:cards_sum,
+        cards_diff:cards_diff,
+        members_actual:members_sum,
+        members_diff:members_diff,
+        itransact_actual:itransact_sum,
+        itransact_diff:itransact_diff,
+        fip_actual:fip_sum,
+        fip_diff:fip_diff
+    };
+    
+    write_to_DB(weekly_data_for_DB,2,week,o_user);
+}
+
+var handleResult= function(result,week)
 {
     let monday=runAction(result[getDay(result,1)]);//result[getDay(result,1)];
     let tuesday=runAction(result[getDay(result,2)]);
@@ -140,7 +243,8 @@ var handleResult= function(result)
 
     let weekly = runAction(result,null,2);
     let ytd = runAction(result,null,3);
-    
+
+    console.log("Begin merge");
     let merge=
     [{mon:monday.loans,tue:tuesday.loans,wed:wednesday.loans,thur:thursday.loans,fri:friday.loans, 
       weekly_actual:weekly.loans.weekly_actual, weekly_target:weekly.loans.weekly_target, weekly_difference:weekly.loans.weekly_difference, 
@@ -185,6 +289,7 @@ exports.homePage=function(req,res)
     let i=0;
 
     let week=req.body.week;
+    let user=req.session.user;
 
     for(i=1;i<53;i++)
     {
@@ -204,7 +309,7 @@ exports.homePage=function(req,res)
         let thdate=runAction(result[getDay(result,4)],date.format);
         let fdate=runAction(result[getDay(result,5)],date.format);
 
-        res.render('home', { title: 'Books', weeks:weeks, mdate:mdate, tdate:tdate, wdate:wdate, thdate:thdate, fdate:fdate , manager:position});
+        res.render('home', { title: 'Books', user:user,weeks:weeks, mdate:mdate, tdate:tdate, wdate:wdate, thdate:thdate, fdate:fdate , manager:position});
     });
     
 }
@@ -214,9 +319,15 @@ exports.getTableData = function(req,res)
     //console.log("called query");
 
     let week=req.body.week;
+    let user=req.session.user;
+    o_user=user;
+
     //console.log("week= "+week);
-    var sql=`SELECT * FROM (SELECT week,loans,deposits,debit_cards,membership,iTransact,FIP,day FROM books WHERE week=1) b 
-             LEFT JOIN books_weekly bw ON b.week = bw.wweek LEFT JOIN books_ytd ytd ON b.week=ytd.yweek`;
+    var sql=`SELECT * FROM (SELECT week,loans,deposits,debit_cards,membership,iTransact,FIP,day, user as o_user 
+             FROM books WHERE user = '${o_user}' AND week = 1) b 
+             LEFT JOIN books_weekly bw ON b.o_user = bw.user AND bw.wweek = b.week 
+             LEFT JOIN books_ytd ytd ON b.o_user=ytd.user AND ytd.yweek = b.week
+            `;
     
     db.query(sql,function(err,result)
     {
@@ -229,19 +340,21 @@ exports.getTableData = function(req,res)
             {mon:null,tue:null,wed:null,thur:null,fri:null},{mon:null,tue:null,wed:null,thur:null,fri:null},
             {mon:null,tue:null,wed:null,thur:null,fri:null},{mon:null,tue:null,wed:null,thur:null,fri:null}];*/
         
-        if(result.length>0)
-        {
-            final=handleResult(result);
-        }
-        //let table=JSON.stringify(result);
-        console.log("sending: "+final);
-        res.status(200).send(final);
+            if(result.length>0)
+            {
+                final=handleResult(result,week);
+            }
+
+            console.log("total: "+final);
+            res.status(200).send(final);
     });
 }
 
 exports.updateTable=function(req,res)
 {
     let week=req.body.week;
+    let user=req.session.user;
+    o_user=user;
     //console.log("week= "+week);
 
     //var sql="SELECT loans,deposits,debit_cards,membership,iTransact,FIP,day FROM books WHERE week="+week+"";
@@ -261,7 +374,7 @@ exports.updateTable=function(req,res)
         
         if(result.length>0)
         {
-            final=handleResult(result);
+            final=handleResult(result,week);
         }
         console.log("total: "+final);
 
@@ -321,6 +434,8 @@ exports.updateDB=function(req,res)
     let week=req.body.week;
 
     let rtype= req.body.rtype;
+
+    let user = req.session.user;
 
     all_sql={0: "SELECT * FROM books WHERE day = "+day+" AND week = "+week,
              1: "SELECT weekly_actual FROM books_weekly WHERE wweek = "+week,
@@ -420,7 +535,7 @@ exports.updateDB=function(req,res)
         {
             let values=[];
 
-            sql= "INSERT INTO books(week,bdate,day,loans,deposits,debit_cards,membership,iTransact,FIP) VALUES ?";
+            sql= `INSERT INTO books(week,bdate,day,loans,deposits,debit_cards,membership,iTransact,FIP) VALUES ?`;
             values=[[week,bdate,day,loans,deposits,cards,membership,iTransact,FIP]];
 
             if(rtype>0)

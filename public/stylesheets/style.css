@@ -176,7 +176,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 #option{
   width: 120px;
-  min-height: 70px;
+  
   position: fixed;
   top:0;
   right:0;
@@ -194,7 +194,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .options label{
-  padding: 10px 0;
+  padding: 8px 0;
   pointer-events: none;
 }
 

@@ -4,7 +4,7 @@
         <div class="bg-dark text-white col-sm-1 week_cont">
             <label class="week_label offset-sm-1">Week #</label>
             <form id="sel_form" method="POST" action="/books_update">
-                <select name="week" id="sel_week" class="offset-sm-1 bg-secondary text-white">
+                <select name="week" id="sel_week" class="offset-sm-1 bg-secondary text-white" style="width:60px">
                     {{#each weeks}}
                         <option value={{this}}>{{this}}</option>
                     {{/each}}
@@ -21,7 +21,11 @@
                 <label id="logout" class="dropdown-item">Logout</label>
             </div>
         </div>-->
+        <div class="user_div offset-sm-3 col-sm-3 bg-dark text-center" style="height:40px">
+            <h5 class="text-white">{{user}}</h5>
+        </div>
     </div>
+
     <!---Drop Down Options--->
     <nav class="navbar navbar-dark bg-dark text-white" id="option">
             <button class="navbar-toggler offset-sm-2" type="button" data-toggle="collapse" data-target="#menu" 
@@ -148,12 +152,12 @@
                 <th><br><span id="wdate">{{wdate}}</span><br> Wed <a href="#popup_trigger">&#x270E;</a></th>
                 <th><span id="thdate">{{thdate}}</span><br> Thur <a href="#popup_trigger">&#x270E;</a></th>
                 <th><span id="fdate">{{fdate}}</span><br> Fri <a href="#popup_trigger">&#x270E;</a></th>
-                <th>Actual {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
-                <th>Target {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
-                <th><span id="weekly_date">{{fdate}}</span><br> Difference {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
-                <th>Actual {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
-                <th>Target {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
-                <th><span id="ytd_date"></span><br> Difference {{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}</th>
+                <th>Actual <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th>Target <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th><span id="weekly_date">{{fdate}}</span><br> Difference <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th>Actual <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th>Target <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th><span id="ytd_date"></span><br> Difference <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
             </tr>
         </thead>
         <tbody>

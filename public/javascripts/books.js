@@ -11,8 +11,13 @@ $(document).ready(function(e){
 
         
         var labels=["Loans", "Deposits","Debit Cards","Membership","iTransact","FIP"];
+        
+        var actual_labels = {0:"actual_loans", 1:"actual_deposits",2:"actual_debit_cards",3:"actual_membership",4:"actual_itransact",5:"actual_fip"};
+        var diff_labels= {0:"diff_loans", 1:"diff_deposits",2:"diff_debit_cards",3:"diff_membership",4:"diff_itransact",5:"diff_fip"};
+        
         var days={1:"Monday",2:"Tuesday",3:"Wednesday",4:"Thursday",5:"Friday", 6:"Weekly Actual", 7: "Weekly Target", 8: "Weekly Difference",
                 9: "YTD Actual", 10: "YTD Target", 11: "YTD Difference"};
+
         var type = {6:WEEKLY_ACTUAL,7:WEEKLY_TARGET,8:WEEKLY_DIFF,9:YTD_ACTUAL,10:YTD_TARGET,11:YTD_DIFF};
 
         var count=0;
@@ -23,6 +28,10 @@ $(document).ready(function(e){
             ordering:false,
             dom:"Bfrtip",
             autoWidth:false,
+            initComplete: function()
+            {
+                return todo_on_load();
+            },
             buttons:[{extend:"excelHtml5", text:"Save as Excel", className:"exportButton"}, {extend:"pdf", text:"Save as PDF",className:"exportButton"}],
             ajax:{
                 url:"/books_data",
@@ -107,7 +116,8 @@ $(document).ready(function(e){
         }*/
         
         selWeek(table);
-        
+        //setActual();
+
         function selWeek(table)//select week
         {
             $("#sel_week").change(function(){
@@ -122,6 +132,69 @@ $(document).ready(function(e){
                     $("#thdate").text(result.thdate);
                     $("#fdate").text(result.fdate);
                 });
+            });
+        }
+
+        function todo_on_load()
+        {
+            setActual();
+            setDiff();
+        }
+
+        function setActual()
+        {
+            let i=0;
+            let j=1;
+            let sum=0;
+
+            for(i=0;i<6;i++)
+            {
+                for(j=1;j<6;j++)
+                {
+                    //console.log("cell j: "+j);
+                    sum+= parseFloat(table.cell(i,j).data());
+                }
+                //console.log("sum = "+sum);
+
+                table.cell(i,j).data(sum);
+                sum=0;
+            }
+
+            
+        }
+
+        function setDiff(ytd)
+        {
+            if(ytd)
+            {
+
+            }
+            else
+            {
+                let diff=0;
+                let i=0;
+
+                for(i=0;i<6;i++)
+                {
+                    diff=parseFloat(table.cell(i,7).data() - table.cell(i,6).data());
+                    table.cell(i,8).data(diff);
+                }
+            }
+        }
+
+        function update_auto_db()
+        {
+            let w_data = {};
+            let i=0;
+
+            for(i=0;i<6;i++)
+            {
+                w_data[actual_labels[i]]=tabel.cell(i,6).data();
+                w_data[diff_labels[i]]=tabel.cell(i,8).data();
+            }
+
+            $.post("",w_data,function(){
+
             });
         }
 
