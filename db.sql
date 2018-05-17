@@ -72,3 +72,57 @@ CREATE TABLE IF NOT EXISTS manager_table
     iTransact int NOT NULL,
     FIP int NOT NULL
 );
+
+DELIMITER //
+CREATE PROCEDURE 
+update_weekly(IN _type ENUM('loans','deposits','debit_cards','membership','iTransact','FIP'),IN week int(2), 
+              IN actual float(14,2),IN diff float(14,2), IN _user varchar(30))
+BEGIN 
+    UPDATE books_weekly SET weekly_actual = actual WHERE user = _user AND wweek = week AND ftype_week = _type;
+    UPDATE books_weekly SET weekly_difference = diff WHERE user = _user AND wweek = week AND ftype_week = _type;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE 
+update_ytd(IN _type ENUM('loans','deposits','debit_cards','membership','iTransact','FIP'),IN week int(2), 
+              IN actual float(14,2),IN diff float(14,2), IN _user varchar(30))
+BEGIN 
+    UPDATE books_ytd SET ytd_actual = actual WHERE user = _user AND yweek = week AND ftype_ytd = _type;
+    UPDATE books_ytd SET ytd_difference = diff WHERE user = _user AND yweek = week AND ftype_ytd = _type;
+END //
+DELIMITER ;
+
+/*SUMS*/
+DELIMITER //
+CREATE PROCEDURE 
+w_sum(IN column varchar(15),IN _week int(2), IN _user varchar(30))
+BEGIN
+    SELECT SUM(column) as actual FROM books WHERE week = _week AND user = _user;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE 
+ytd_sum(IN column varchar(15), IN _user varchar(30))
+BEGIN
+    SELECT SUM(column) as actual FROM books WHERE user = _user;
+END //
+DELIMITER ;
+
+/*DIFFS*/
+DELIMITER //
+CREATE PROCEDURE
+w_diff(IN _user,IN _week)
+BEGIN
+    SELECT IF(weekly_target IS NULL,-weekly_actual,weekly_target-weekly_actual) as diff FROM books_weekly WHERE user=_user AND week=_week;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE
+ytd_diff(IN _user)
+BEGIN
+    SELECT IF(ytd_target IS NULL,-ytd_actual,ytd_target-ytd_actual) as diff FROM books_ytd WHERE user=_user;
+END //
+DELIMITER ;

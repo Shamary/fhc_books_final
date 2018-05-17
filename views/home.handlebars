@@ -1,28 +1,20 @@
 <div class="container-fluid home">
     <!---week selection--->
     <div class="row">
-        <div class="bg-dark text-white col-sm-1 week_cont">
+        <div class="bg-dark text-white week_cont">
             <label class="week_label offset-sm-1">Week #</label>
             <form id="sel_form" method="POST" action="/books_update">
-                <select name="week" id="sel_week" class="offset-sm-1 bg-secondary text-white" style="width:60px">
+                <select name="week" id="sel_week" class="offset-sm-3 bg-secondary text-white" style="width:40px">
                     {{#each weeks}}
                         <option value={{this}}>{{this}}</option>
                     {{/each}}
                 </select>
             </form>
         </div>
-        <!--
-        <div class="offset-sm-10 col-sm-1 text-white dropdown">
-            <button type="button" class="btn bg-dark " data-toggle="dropdown">
-                	<div class="stroke"></div>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">Add User</a>
-                <label id="logout" class="dropdown-item">Logout</label>
-            </div>
-        </div>-->
-        <div class="user_div offset-sm-3 col-sm-3 bg-dark text-center" style="height:40px">
-            <h5 class="text-white">{{user}}</h5>
+
+        <!--Logged in user-->
+        <div class="user_div offset-sm-3 col-sm-3 text-center">
+            <span class="text-dark">[</span><label class="text-primary">Shamary Williams</label><span class="text-dark">]</span>
         </div>
     </div>
 

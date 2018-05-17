@@ -12,8 +12,8 @@ $(document).ready(function(e){
         
         var labels=["Loans", "Deposits","Debit Cards","Membership","iTransact","FIP"];
         
-        var actual_labels = {0:"actual_loans", 1:"actual_deposits",2:"actual_debit_cards",3:"actual_membership",4:"actual_itransact",5:"actual_fip"};
-        var diff_labels= {0:"diff_loans", 1:"diff_deposits",2:"diff_debit_cards",3:"diff_membership",4:"diff_itransact",5:"diff_fip"};
+        var actual_labels = {0:"actual_loans", 1:"actual_deposits",2:"actual_cards",3:"actual_membership",4:"actual_itransact",5:"actual_fip"};
+        var diff_labels= {0:"diff_loans", 1:"diff_deposits",2:"diff_cards",3:"diff_membership",4:"diff_itransact",5:"diff_fip"};
         
         var days={1:"Monday",2:"Tuesday",3:"Wednesday",4:"Thursday",5:"Friday", 6:"Weekly Actual", 7: "Weekly Target", 8: "Weekly Difference",
                 9: "YTD Actual", 10: "YTD Target", 11: "YTD Difference"};
@@ -28,10 +28,7 @@ $(document).ready(function(e){
             ordering:false,
             dom:"Bfrtip",
             autoWidth:false,
-            initComplete: function()
-            {
-                return todo_on_load();
-            },
+            /*initComplete: todo_on_load,*/
             buttons:[{extend:"excelHtml5", text:"Save as Excel", className:"exportButton"}, {extend:"pdf", text:"Save as PDF",className:"exportButton"}],
             ajax:{
                 url:"/books_data",
@@ -122,7 +119,7 @@ $(document).ready(function(e){
         {
             $("#sel_week").change(function(){
                 count=0;
-                table.ajax.url("/books_update").load();
+                table.ajax.url("/books_update").load(todo_on_load);
                 $.post('/update_headings',{week:$("#sel_week").val()},function(result){
 
                     //console.log("result= "+result.mdate);
@@ -139,6 +136,7 @@ $(document).ready(function(e){
         {
             setActual();
             setDiff();
+            update_auto_db();
         }
 
         function setActual()
@@ -152,7 +150,10 @@ $(document).ready(function(e){
                 for(j=1;j<6;j++)
                 {
                     //console.log("cell j: "+j);
-                    sum+= parseFloat(table.cell(i,j).data());
+                    if(table.cell(i,j).data())
+                    {
+                        sum+= parseFloat(table.cell(i,j).data());
+                    }
                 }
                 //console.log("sum = "+sum);
 
@@ -189,12 +190,16 @@ $(document).ready(function(e){
 
             for(i=0;i<6;i++)
             {
-                w_data[actual_labels[i]]=tabel.cell(i,6).data();
-                w_data[diff_labels[i]]=tabel.cell(i,8).data();
+                w_data[actual_labels[i]]=table.cell(i,6).data();
+                w_data[diff_labels[i]]=table.cell(i,8).data();
             }
+            w_data["type"]=2;
+            w_data["week"]=$("#sel_week").val();
 
-            $.post("",w_data,function(){
+            console.log("HERE: "+JSON.stringify(w_data));
 
+            $.post("/update_auto",w_data,function(data){
+                console.log("success");
             });
         }
 

@@ -132,107 +132,6 @@ var runAction=function(result,action,type)
     
 }
 
-var sums= function(days)
-{
-    let i=0;
-    let sum=0;
-    for(i=0;i<days.length;i++)
-    {
-        if(days[i]!=null)
-        {
-            sum+=days[i];
-        }
-    }
-
-    return sum;
-}
-
-var diff= function(actual,target)
-{
-    let diff= -actual;
-    if(target!=null)
-    {
-        diff= target - actual;
-    }
-
-    return diff;
-}
-
-var write_to_DB = function(fields,type,week,user)
-{
-    let sql=``;
-    let table={2:"books_weekly",3:"books_ytd"};
-    let cols={2:"ftype_week,wweek,weekly_actual,weekly_difference,user",
-              3:"ftype_ytd,yweek,ytd_actual,ytd_difference,user"};
-
-    let col=cols[type].split(",");
-    console.log("cols = "+col[0]+col[1]+col[2]+col[3]+col[4]);
-
-    sql=`INSERT INTO ${table[type]}(${col[0]},${col[1]},${col[2]},${col[3]},${col[4]}) VALUES ?`;
-    let values=[["loans",week,fields.loans_actual,fields.loans_diff,user],
-                ["deposits",week,fields.deposits_actual,fields.deposits_diff,user],
-                ["debit_cards",week,fields.cards_actual,fields.cards_diff,user],
-                ["membership",week,fields.members_actual,fields.members_diff,user],
-                ["iTransact",week,fields.itransact_actual,fields.itransact_diff,user],
-                ["FIP",week,fields.fip_actual,fields.fip_diff,user]];
-
-    db.query(sql,[values],function(err){
-        if(err)
-        {
-            throw err;
-        }
-
-        console.log("Done write");
-    });
-}
-
-var handleAuto = function(result,week)
-{
-    let monday=runAction(result[getDay(result,1)]);//result[getDay(result,1)];
-    let tuesday=runAction(result[getDay(result,2)]);
-    let wednesday=runAction(result[getDay(result,3)]);
-    let thursday=runAction(result[getDay(result,4)]);
-    let friday=runAction(result[getDay(result,5)]);
-    
-    ///weekly actual
-    let loans_sum=sums([monday.loans,tuesday.loans,wednesday.loans,thursday.loans,friday.loans]);
-    let deposits_sum=sums([monday.deposits,tuesday.deposits,wednesday.deposits,thursday.deposits,friday.deposits]);
-    let cards_sum=sums([monday.debit_cards,tuesday.debit_cards,wednesday.debit_cards,thursday.debit_cards,friday.debit_cards]);
-    let members_sum=sums([monday.membership,tuesday.membership,wednesday.membership,thursday.membership,friday.membership]);
-    let itransact_sum=sums([monday.iTransact,tuesday.iTransact,wednesday.iTransact,thursday.iTransact,friday.iTransact]);
-    let fip_sum=sums([monday.FIP,tuesday.FIP,wednesday.FIP,thursday.FIP,friday.FIP]);
-
-
-    let weekly = runAction(result,null,2);
-    let ytd = runAction(result,null,3);
-
-    //weekly difference
-    let loans_diff=diff(loans_sum,weekly.weekly_target);
-    let deposits_diff=diff(deposits_sum,weekly.weekly_target);
-    let cards_diff=diff(cards_sum,weekly.weekly_target);
-    let members_diff=diff(members_sum,weekly.weekly_target);
-    let itransact_diff=diff(itransact_sum,weekly.weekly_target);
-    let fip_diff=diff(fip_sum,weekly.weekly_target);
-
-    let weekly_data_for_DB =
-    {
-        loans_actual:loans_sum,
-        loans_diff:loans_diff,
-        deposits_actual:deposits_sum,
-        deposits_diff:deposits_diff,
-        cards_actual:cards_sum,
-        cards_diff:cards_diff,
-        members_actual:members_sum,
-        members_diff:members_diff,
-        itransact_actual:itransact_sum,
-        itransact_diff:itransact_diff,
-        fip_actual:fip_sum,
-        fip_diff:fip_diff
-    };
-    
-    write_to_DB(weekly_data_for_DB,2,week,o_user);
-}
-
 var handleResult= function(result,week)
 {
     let monday=runAction(result[getDay(result,1)]);//result[getDay(result,1)];
@@ -438,12 +337,8 @@ exports.updateDB=function(req,res)
     let user = req.session.user;
 
     all_sql={0: "SELECT * FROM books WHERE day = "+day+" AND week = "+week,
-             1: "SELECT weekly_actual FROM books_weekly WHERE wweek = "+week,
              2: "SELECT weekly_target FROM books_weekly WHERE wweek = "+week,
-             3: "SELECT weekly_difference FROM books_weekly WHERE wweek = "+week,
-             4: "SELECT ytd_actual FROM books_ytd WHERE yweek = "+week,
-             5: "SELECT ytd_target FROM books_ytd WHERE yweek = "+week,
-             6: "SELECT ytd_difference FROM books_ytd WHERE yweek = "+week};
+             5: "SELECT ytd_target FROM books_ytd WHERE yweek = "+week};
 
     let sql="SELECT * FROM books WHERE day = "+day+" AND week = "+week;
     sql=all_sql[rtype];
@@ -459,53 +354,25 @@ exports.updateDB=function(req,res)
             let values=[];
             if(rtype==0)
             {
-                sql= "UPDATE books SET loans = "+loans+","+"deposits="+deposits+",debit_cards="+cards+",membership="+membership+
-                ",iTransact="+iTransact+",FIP="+FIP+", bdate = '"+bdate+"' WHERE week = "+week+" AND day = "+day+"";
+                sql= `UPDATE books SET loans = ${loans},deposits= ${deposits},debit_cards=${cards},membership= ${membership}
+                ,iTransact=${iTransact},FIP=${FIP}, bdate = '${bdate}' WHERE week = ${week} AND day = ${day} AND user = ${user}`;
             }
             else 
             {
                 let table="", cols=[];
 
-                if(rtype==WEEKLY_ACTUAL)
-                {
-                    table="books_weekly";
-                    cols[0]="ftype_week";
-                    cols[1]= "weekly_actual";
-                    cols[2]= "wweek";                    
-                }
-                else if(rtype==WEEKLY_TARGET)
+                if(rtype==WEEKLY_TARGET)
                 {
                     table="books_weekly";
                     cols[0]="ftype_week";
                     cols[1]= "weekly_target";
                     cols[2]= "wweek";                    
                 }
-                else if(rtype==WEEKLY_DIFF)
-                {
-                    table="books_weekly";
-                    cols[0]="ftype_week";
-                    cols[1]= "weekly_difference";
-                    cols[2]= "wweek";                    
-                }
-                else if(rtype==YTD_ACTUAL)
-                {
-                    table="books_ytd";
-                    cols[0]="ftype_ytd";
-                    cols[1]= "ytd_actual";
-                    cols[2]= "yweek";                    
-                }
-                else if(rtype==YTD_TARGET)
+                if(rtype==YTD_TARGET)
                 {
                     table="books_ytd";
                     cols[0]="ftype_ytd";
                     cols[1]= "ytd_target";
-                    cols[2]= "yweek";                    
-                }
-                else if(rtype==YTD_DIFF)
-                {
-                    table="books_ytd";
-                    cols[0]="ftype_ytd";
-                    cols[1]= "ytd_difference";
                     cols[2]= "yweek";                    
                 }
                 
@@ -542,47 +409,19 @@ exports.updateDB=function(req,res)
             {
                 let table="", cols=[]; 
 
-                if(rtype==WEEKLY_ACTUAL)
-                {
-                    table="books_weekly";
-                    cols[0]="ftype_week";
-                    cols[1]="wweek";
-                    cols[2]="weekly_actual";
-                }
-                else if(rtype==WEEKLY_TARGET)
+                if(rtype==WEEKLY_TARGET)
                 {
                     table="books_weekly";
                     cols[0]="ftype_week";
                     cols[1]="wweek";
                     cols[2]="weekly_target";
                 }
-                else if(rtype==WEEKLY_DIFF)
-                {
-                    table="books_weekly";
-                    cols[0]="ftype_week";
-                    cols[1]="wweek";
-                    cols[2]="weekly_difference";
-                }
-                else if(rtype==YTD_ACTUAL)
-                {
-                    table="books_ytd";
-                    cols[0]="ftype_ytd";
-                    cols[1]="yweek";
-                    cols[2]="ytd_actual";
-                }
-                else if(rtype==YTD_TARGET)
+                if(rtype==YTD_TARGET)
                 {
                     table="books_ytd";
                     cols[0]="ftype_ytd";
                     cols[1]="yweek";
                     cols[2]="ytd_target";
-                }
-                else if(rtype==YTD_DIFF)
-                {
-                    table="books_ytd";
-                    cols[0]="ftype_ytd";
-                    cols[1]="yweek";
-                    cols[2]="ytd_difference";
                 }
 
                 sql= `INSERT INTO ${table}(${cols[0]},${cols[1]},${cols[2]}) VALUES ('loans',${week},${loans}),
@@ -601,6 +440,84 @@ exports.updateDB=function(req,res)
                 }
 
                 res.redirect("/");
+            });
+        }
+    });
+}
+
+exports.update_auto = function(req,res)
+{
+    let week=req.body.week;
+    let user=req.session.user;
+    let type=req.body.type;
+
+    let loans_actual=req.body.actual_loans;
+    let deposits_actual=req.body.actual_deposits;
+    let cards_actual=req.body.actual_cards;
+    let members_actual=req.body.actual_membership;
+    let itransact_actual=req.body.actual_itransact;
+    let fip_actual=req.body.actual_fip;
+
+    let loans_diff=req.body.diff_loans;
+    let deposits_diff=req.body.diff_deposits;
+    let cards_diff=req.body.diff_cards;
+    let members_diff=req.body.diff_membership;
+    let itransact_diff=req.body.diff_itransact;
+    let fip_diff=req.body.diff_fip;
+
+    let sql={2:`SELECT * FROM books_weekly WHERE user = '${user}' AND wweek = '${week}'`,
+             3:`SELECT * FROM books_ytd WHERE user = '${user}' AND wweek = '${week}'`};
+
+    let insert_sql={2:"INSERT INTO books_weekly(ftype_week,wweek,weekly_actual,weekly_difference,user) VALUES ?",
+                    3:"INSERT INTO books_ytd(ftype_ytd,yweek,ytd_actual,ytd_difference) VALUES ?"};
+    
+    let update_sql={2:`CALL update_weekly('loans',${week},${loans_actual},${loans_diff},'${user}');
+                       CALL update_weekly('deposits',${week},${deposits_actual},${deposits_diff},'${user}');
+                       CALL update_weekly('debit_cards',${week},${cards_actual},${cards_diff},'${user}');
+                       CALL update_weekly('membership',${week},${members_actual},${members_diff},'${user}');
+                       CALL update_weekly('iTransact',${week},${itransact_actual},${itransact_diff},'${user}');
+                       CALL update_weekly('FIP',${week},${fip_actual},${fip_diff},'${user}');`,
+
+                    3:`CALL update_ytd('loans',${week},${loans_actual},${loans_diff},'${user}');
+                       CALL update_ytd('deposits',${week},${deposits_actual},${deposits_diff},'${user}');
+                       CALL update_ytd('debit_cards',${week},${cards_actual},${cards_diff},'${user}');
+                       CALL update_ytd('membership',${week},${members_actual},${members_diff},'${user}');
+                       CALL update_ytd('iTransact',${week},${itransact_actual},${itransact_diff},'${user}');
+                       CALL update_ytd('FIP',${week},${fip_actual},${fip_diff},'${user}');`}
+
+    db.query(sql[type],function(err,result){
+        if(err)
+        {
+            throw err;
+        }
+
+        if(result.length>0)
+        {
+            db.query(update_sql[type],function(err){
+                if(err)
+                {
+                    throw err;
+                }
+
+                res.status(200).send("OK");
+            });
+        }
+        else
+        {
+            let values=[["loans",week,loans_actual,loans_diff,user],
+                        ["deposits",week,deposits_actual,deposits_diff,user],
+                        ["debit_cards",week,cards_actual,cards_diff,user],
+                        ["membership",week,members_actual,members_diff,user],
+                        ["iTransact",week,itransact_actual,itransact_diff,user],
+                        ["FIP",week,fip_actual,fip_diff,user]];
+
+            db.query(insert_sql[type],[values],function(err){
+                if(err)
+                {
+                    throw err;
+                }
+
+                res.status(200).send("OK");
             });
         }
     });

@@ -31,13 +31,20 @@ a {
   color: #00B7FF;
 }
 
+#sel_form{
+  display: inline-block;
+}
+
 .week_cont{
-  height:70px;
-  margin-bottom: 50px;
+  width: 150px;
+  height: 50px;/*70px;*/
+  margin-bottom: 90px;
+
+  border-bottom-right-radius: 5px;
 }
 
 .week_label{
-  margin-top:10px;
+  margin-top:13px;
   font-size: 12pt;
 }
 
@@ -182,6 +189,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   right:0;
 
   opacity: 0.9;
+
+  border-bottom-left-radius: 5px;
 }
 
 #option a{
@@ -210,4 +219,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
   border:1px solid #1e2226;
   outline:none;
+}
+
+.user_div{
+  height: 30px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+
+.user_div span{
+  font-weight: bold;
+  font-size: 24pt;
+}
+
+.user_div label{
+  font-size: 21pt;
+  font-weight: bold;
 }
