@@ -119,7 +119,7 @@ $(document).ready(function(e){
         {
             $("#sel_week").change(function(){
                 count=0;
-                table.ajax.url("/books_update").load(todo_on_load);
+                table.ajax.url("/books_update").load(/*todo_on_load*/);
                 $.post('/update_headings',{week:$("#sel_week").val()},function(result){
 
                     //console.log("result= "+result.mdate);

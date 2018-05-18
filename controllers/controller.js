@@ -132,6 +132,11 @@ var runAction=function(result,action,type)
     
 }
 
+var handle_auto_cols = function()
+{
+    
+}
+
 var handleResult= function(result,week)
 {
     let monday=runAction(result[getDay(result,1)]);//result[getDay(result,1)];
@@ -222,10 +227,10 @@ exports.getTableData = function(req,res)
     o_user=user;
 
     //console.log("week= "+week);
-    var sql=`SELECT * FROM (SELECT week,loans,deposits,debit_cards,membership,iTransact,FIP,day, user as o_user 
-             FROM books WHERE user = '${o_user}' AND week = 1) b 
-             LEFT JOIN books_weekly bw ON b.o_user = bw.user AND bw.wweek = b.week 
-             LEFT JOIN books_ytd ytd ON b.o_user=ytd.user AND ytd.yweek = b.week
+    var sql=`SELECT * FROM (SELECT * FROM books WHERE user ='${user}' AND week =${week}) b
+             LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
+             JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_target,ytd_difference,user from books_ytd) as b3 
+             ON b2.ftype_week = b3.ftype_ytd
             `;
     
     db.query(sql,function(err,result)
@@ -257,8 +262,10 @@ exports.updateTable=function(req,res)
     //console.log("week= "+week);
 
     //var sql="SELECT loans,deposits,debit_cards,membership,iTransact,FIP,day FROM books WHERE week="+week+"";
-    var sql=`SELECT * FROM (SELECT week,loans,deposits,debit_cards,membership,iTransact,FIP,day FROM books WHERE week= ${week}) b 
-    LEFT JOIN books_weekly bw ON b.week = bw.wweek LEFT JOIN books_ytd ytd ON b.week=ytd.yweek`;
+    var sql=`SELECT * FROM (SELECT * FROM books WHERE user ='${user}' AND week =${week}) b
+    LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
+    JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_target,ytd_difference,user from books_ytd) as b3 
+    ON b2.ftype_week = b3.ftype_ytd`;
 
     db.query(sql,function(err,result)
     {
@@ -338,7 +345,7 @@ exports.updateDB=function(req,res)
 
     all_sql={0: "SELECT * FROM books WHERE day = "+day+" AND week = "+week,
              2: "SELECT weekly_target FROM books_weekly WHERE wweek = "+week,
-             5: "SELECT ytd_target FROM books_ytd WHERE yweek = "+week};
+             5: "SELECT ytd_target FROM books_ytd"};
 
     let sql="SELECT * FROM books WHERE day = "+day+" AND week = "+week;
     sql=all_sql[rtype];
@@ -355,7 +362,7 @@ exports.updateDB=function(req,res)
             if(rtype==0)
             {
                 sql= `UPDATE books SET loans = ${loans},deposits= ${deposits},debit_cards=${cards},membership= ${membership}
-                ,iTransact=${iTransact},FIP=${FIP}, bdate = '${bdate}' WHERE week = ${week} AND day = ${day} AND user = ${user}`;
+                ,iTransact=${iTransact},FIP=${FIP}, bdate = '${bdate}' WHERE week = ${week} AND day = ${day} AND user = '${user}';`;
             }
             else 
             {
@@ -376,18 +383,20 @@ exports.updateDB=function(req,res)
                     cols[2]= "yweek";                    
                 }
                 
-                sql= `UPDATE ${table} SET ${cols[1]} = ${loans} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'loans';
-                     UPDATE ${table} SET ${cols[1]} = ${deposits} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'deposits';
-                     UPDATE ${table} SET ${cols[1]} = ${cards} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'debit_cards';
-                     UPDATE ${table} SET ${cols[1]} = ${membership} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'membership';
-                     UPDATE ${table} SET ${cols[1]} = ${iTransact} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'iTransact';
-                     UPDATE ${table} SET ${cols[1]} = ${FIP} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'FIP';`;
+                sql= `UPDATE ${table} SET ${cols[1]} = ${loans} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'loans' AND user= '${user}';
+                     UPDATE ${table} SET ${cols[1]} = ${deposits} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'deposits' AND user= '${user}';
+                     UPDATE ${table} SET ${cols[1]} = ${cards} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'debit_cards' AND user= '${user}';
+                     UPDATE ${table} SET ${cols[1]} = ${membership} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'membership' AND user= '${user}';
+                     UPDATE ${table} SET ${cols[1]} = ${iTransact} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'iTransact' AND user= '${user}';
+                     UPDATE ${table} SET ${cols[1]} = ${FIP} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'FIP' AND user= '${user}';`;
 
                 /*sql= `UPDATE ${table} SET ${cols[1]} = ? WHERE week = ? AND ${cols[0]} = ?`;
 
                 //values=[['loans',loans],['deposits',deposits],['debit_cards',cards],['membership',membership],['iTransact',iTransact],['FIP',FIP]];
                 values=[[loans,week,'loans']];*/
             }
+            
+            sql+=`CALL update_weekly_auto(${week},'${user}')`;
 
             db.query(sql/*,values*/,function(err){
                 if(err)
@@ -402,8 +411,8 @@ exports.updateDB=function(req,res)
         {
             let values=[];
 
-            sql= `INSERT INTO books(week,bdate,day,loans,deposits,debit_cards,membership,iTransact,FIP) VALUES ?`;
-            values=[[week,bdate,day,loans,deposits,cards,membership,iTransact,FIP]];
+            sql= `INSERT INTO books(week,bdate,day,loans,deposits,debit_cards,membership,iTransact,FIP,user) VALUES ?`;
+            values=[[week,bdate,day,loans,deposits,cards,membership,iTransact,FIP,user]];
 
             if(rtype>0)
             {
@@ -424,14 +433,16 @@ exports.updateDB=function(req,res)
                     cols[2]="ytd_target";
                 }
 
-                sql= `INSERT INTO ${table}(${cols[0]},${cols[1]},${cols[2]}) VALUES ('loans',${week},${loans}),
-                     ('deposits',${week},${deposits}),
-                     ('debit_cards',${week},${cards}),
-                     ('membership',${week},${membership}),
-                     ('iTransact',${week},${iTransact}),
-                     ('FIP',${week},${FIP})`;
+                sql= `INSERT INTO ${table}(${cols[0]},${cols[1]},${cols[2]},user) VALUES ('loans',${week},${loans},${user}),
+                     ('deposits',${week},${deposits},${user}),
+                     ('debit_cards',${week},${cards},${user}),
+                     ('membership',${week},${membership},${user}),
+                     ('iTransact',${week},${iTransact},${user}),
+                     ('FIP',${week},${FIP},${user})`;
                 values=[[]];
             }
+
+            sql+=`; CALL update_weekly_auto(${week},'${user}')`;
 
             db.query(sql,[values],function(err){
                 if(err)
