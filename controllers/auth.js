@@ -70,12 +70,27 @@ exports.isLoggedIn=function(req,res,next)
     }
 }
 
+exports.isManager = function(req,res,next)
+{
+    if(req.session.position=="manager")
+    {
+        next();
+    }
+    else
+    {
+        res.redirect('/');
+    }
+}
+
 exports.registerUser=function(req,res)
 {
     let _username=req.body.username;
     let _password=req.body.password;
     let _confirm_password = req.body.confirm_password;
     let position= req.body.position;
+    let branch = req.body.branch;
+
+    let from=req.body.from;
 
     if(_confirm_password!=_password)
     {
@@ -85,8 +100,8 @@ exports.registerUser=function(req,res)
     }
     else
     {
-        sql= `INSERT INTO user(_username,_password,position) VALUES ?`;
-        let values= [[_username,bcrypt.hashSync(_password,salt),position]];
+        sql= `INSERT INTO user(_username,_password,position,branch) VALUES ?`;
+        let values= [[_username,bcrypt.hashSync(_password,salt),position,branch]];
 
         db.query(sql,[values],function(err){
             if(err)
@@ -96,7 +111,7 @@ exports.registerUser=function(req,res)
 
             req.flash("add_success","user added successfully");
             //res.status(200).send("OK");
-            res.redirect("/#add_user");
+            res.redirect(`${from}#add_user`);
         });
     }
 }

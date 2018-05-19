@@ -29,6 +29,9 @@
                     <div class="row mt-3 options">
                         <a class="row offset-sm-3" href="#add_user">Add User</a>
                     </div>
+                    <div id="targets" class="row options">
+                        <label class="row offset-sm-3">Targets</label>
+                    </div>
                 {{/if}}
                 <div id="logout" class="row options">
                     <label class="row offset-sm-3">Logout</label>
@@ -107,6 +110,7 @@
             <a class="close" href="#">X</a>
             <form id="add_user_form" action="/register" method="POST">
             <br>
+                <input id="from" type="hidden" name="from" value="/"/>
                 <div class="row mt-5">
                     <input class="login_input offset-sm-1 col-sm-10 text-white" type="text" name="username" placeholder="username" maxlength="30" required/>
                 </div>
@@ -115,6 +119,9 @@
                         <option>bsr</option>
                         <option>manager</option>
                     </select>
+                </div>
+                <div class="row mt-3">
+                    <input class="login_input offset-sm-1 col-sm-10 text-white" type="number" name="branch" placeholder="branch" min="1" equired/>
                 </div>
                 <div class="row mt-3">
                     <input class="login_input offset-sm-1 col-sm-10 text-white" type="password" name="password" placeholder="password" required/>

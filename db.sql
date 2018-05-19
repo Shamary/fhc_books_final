@@ -6,18 +6,21 @@ CREATE TABLE IF NOT EXISTS user
 (
     _username varchar(30) NOT NULL PRIMARY KEY,
     _password varchar(60) NOT NULL,
-    position ENUM('bsr','manager') NOT NULL
+    position ENUM('bsr','manager') NOT NULL,
+    branch int NOT NULL
 );
 
-INSERT IGNORE INTO user VALUES("admin","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","manager");
-INSERT IGNORE INTO user VALUES("bsr1","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","bsr");
+INSERT IGNORE INTO user VALUES("admin","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","manager",1);
+INSERT IGNORE INTO user VALUES("bsr1","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","bsr",1);
+INSERT IGNORE INTO user VALUES("bsr2","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","bsr",1);
+INSERT IGNORE INTO user VALUES("bsr3","$2a$10$Gckw6owwyfHfXICK0AwLG.Ay9f2rkpmivZb51mnsR7xTIrhl1FQji","bsr",4);
 
 
 CREATE TABLE IF NOT EXISTS books
 (
     /*id int NOT NULL AUTO_INCREMENT,*/ 
     week int(2) NOT NULL /*PRIMARY KEY*/,
-    bdate Date NOT NULL,
+    bdate Date,
     day int NOT NULL,
     loans float(14,2) NOT NULL,
     deposits float(14,2) NOT NULL,
@@ -65,147 +68,16 @@ CREATE TABLE IF NOT EXISTS books_ytd
 CREATE TABLE IF NOT EXISTS manager_table
 (
     manager varchar(30) NOT NULL,
-    branch varchar(20) NOT NULL,
+    branch int,
     bsr_name varchar(30) NOT NULL,
-    position ENUM('bsr') NOT NULL,
+    position ENUM('bsr'),
     loans float(14,2) NOT NULL,
     deposits float(14,2) NOT NULL,
     debit_cards int NOT NULL,
     membership int NOT NULL,
     iTransact int NOT NULL,
-    FIP int NOT NULL
+    FIP int NOT NULL,
+    week_or_eoy int(1),
+    PRIMARY KEY(manager,bsr_name,week_or_eoy),
+    CONSTRAINT FOREIGN KEY (bsr_name) REFERENCES user(_username) ON DELETE CASCADE
 );
-
-/****************UPDATES********************/
-DELIMITER //
-CREATE PROCEDURE 
-update_weekly(IN _type ENUM('loans','deposits','debit_cards','membership','iTransact','FIP'),IN week int(2), 
-              IN actual float(14,2),IN diff float(14,2), IN _user varchar(30))
-BEGIN 
-    UPDATE books_weekly SET weekly_actual = actual WHERE user = _user AND wweek = week AND ftype_week = _type;
-    UPDATE books_weekly SET weekly_difference = diff WHERE user = _user AND wweek = week AND ftype_week = _type;
-END //
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE 
-update_ytd(IN _type ENUM('loans','deposits','debit_cards','membership','iTransact','FIP'),IN week int(2), 
-              IN actual float(14,2),IN diff float(14,2), IN _user varchar(30))
-BEGIN 
-    UPDATE books_ytd SET ytd_actual = actual WHERE user = _user AND yweek = week AND ftype_ytd = _type;
-    UPDATE books_ytd SET ytd_difference = diff WHERE user = _user AND yweek = week AND ftype_ytd = _type;
-END //
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE
-update_weekly_auto(IN _week int(2),IN _user varchar(30))
-BEGIN
-    INSERT IGNORE INTO books_weekly(ftype_week,wweek,user) VALUES('loans',_week,_user), ('deposits',_week,_user),('debit_cards',_week,_user),
-                                                            ('membership',_week,_user),('iTransact',_week,_user), ('FIP',_week,_user);
-
-    UPDATE books_weekly SET weekly_actual = (SELECT SUM(loans) FROM books WHERE week=_week AND user=_user) 
-    WHERE ftype_week= 'loans' AND user=_user AND wweek=_week;
-
-    UPDATE books_weekly SET weekly_actual = (SELECT SUM(deposits) FROM books WHERE week=_week AND user=_user) 
-    WHERE ftype_week= 'deposits' AND user=_user AND wweek=_week;
-
-    UPDATE books_weekly SET weekly_actual = (SELECT SUM(debit_cards) FROM books WHERE week=_week AND user=_user) 
-    WHERE ftype_week= 'debit_cards' AND user=_user AND wweek=_week;
-
-    UPDATE books_weekly SET weekly_actual = (SELECT SUM(membership) FROM books WHERE week=_week AND user=_user) 
-    WHERE ftype_week= 'membership' AND user=_user AND wweek=_week;
-
-    UPDATE books_weekly SET weekly_actual = (SELECT SUM(iTransact) FROM books WHERE week=_week AND user=_user) 
-    WHERE ftype_week= 'iTransact' AND user=_user AND wweek=_week;
-
-    UPDATE books_weekly SET weekly_actual = (SELECT SUM(FIP) FROM books WHERE week=_week AND user=_user) 
-    WHERE ftype_week= 'FIP' AND user=_user AND wweek=_week;
-
-    UPDATE books_weekly SET weekly_difference = IF(weekly_target IS NULL,-weekly_actual,weekly_target-weekly_actual) 
-    WHERE user=_user AND wweek=_week;
-
-    CALL update_ytd_auto(_user);
-END //
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE
-update_ytd_auto(IN _user varchar(30))
-BEGIN
-    INSERT IGNORE INTO books_ytd(ftype_ytd,user) VALUES('loans',_user), ('deposits',_user),('debit_cards',_user),
-                                                            ('membership',_user),('iTransact',_user),('FIP',_user);
-
-    UPDATE books_ytd SET ytd_actual = (SELECT SUM(loans) FROM books) WHERE ftype_ytd= 'loans' AND user=_user;
-    UPDATE books_ytd SET ytd_actual = (SELECT SUM(deposits) FROM books) WHERE ftype_ytd= 'deposits' AND user=_user;
-    UPDATE books_ytd SET ytd_actual = (SELECT SUM(debit_cards) FROM books) WHERE ftype_ytd= 'debit_cards' AND user=_user;
-    UPDATE books_ytd SET ytd_actual = (SELECT SUM(membership) FROM books) WHERE ftype_ytd= 'membership' AND user=_user;
-    UPDATE books_ytd SET ytd_actual = (SELECT SUM(iTransact) FROM books) WHERE ftype_ytd= 'iTransact' AND user=_user;
-    UPDATE books_ytd SET ytd_actual = (SELECT SUM(FIP) FROM books) WHERE ftype_ytd= 'FIP' AND user=_user;
-
-    UPDATE books_ytd SET ytd_difference = IF(ytd_target IS NULL,-ytd_actual,ytd_target-ytd_actual) 
-    WHERE user=_user;
-
-END //
-DELIMITER ;
-
-/******************SUMS*******************/
-DELIMITER //
-CREATE PROCEDURE 
-w_sum(IN _week int(2), IN _user varchar(30))
-BEGIN
-    SELECT SUM(loans) as actual FROM books WHERE week = _week AND user = _user UNION
-    SELECT SUM(deposits) FROM books WHERE week = _week AND user = _user UNION
-    SELECT SUM(debit_cards) FROM books WHERE week = _week AND user = _user UNION
-    SELECT SUM(membership) FROM books WHERE week = _week AND user = _user UNION
-    SELECT SUM(iTransact) FROM books WHERE week = _week AND user = _user UNION
-    SELECT SUM(FIP) FROM books WHERE week = _week AND user = _user;
-END //
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE 
-ytd_sum(IN _user varchar(30))
-BEGIN
-    SELECT SUM(loans) as actual FROM books WHERE user = _user UNION
-    SELECT SUM(deposits) FROM books WHERE user = _user UNION
-    SELECT SUM(debit_cards)FROM books WHERE user = _user UNION
-    SELECT SUM(membership) FROM books WHERE user = _user UNION
-    SELECT SUM(iTransact) FROM books WHERE user = _user UNION
-    SELECT SUM(FIP) FROM books WHERE user = _user;
-END //
-DELIMITER ;
-
-/********************DIFFS*******************/
-DELIMITER //
-CREATE PROCEDURE
-w_diff(IN _user varchar(30),IN _week int(2))
-BEGIN
-    SELECT IF(weekly_target IS NULL,-weekly_actual,weekly_target-weekly_actual) as diff FROM books_weekly WHERE user=_user AND week=_week;
-END //
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE
-ytd_diff(IN _user varchar(30))
-BEGIN
-    SELECT IF(ytd_target IS NULL,-ytd_actual,ytd_target-ytd_actual) as diff FROM books_ytd WHERE user=_user;
-END //
-DELIMITER ;
-
-
-/******************CALLS***************/
-CALL update_weekly_auto(1,"bsr1");
-
-/*
-select * from (select * from books_weekly where wweek=1) b 
-JOIN (select ftype_ytd as ftype_week,yweek,ytd_actual,ytd_target,ytd_difference,user from books_ytd) as t2 
-ON b.ftype_week=t2.ftype_week AND b.user = t2.user
-RIGHT JOIN books b0 ON b0.user=b.user;
-
-SELECT * FROM (SELECT * FROM books WHERE user ='bsr1' AND week =1) b
-LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
-JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_target,ytd_difference,user from books_ytd) as b3 ON b2.ftype_week = b3.ftype_ytd; 
-
-
-select * from books_weekly b JOIN (select * from books_ytd) as t2 ON t2.user=b.user;*/

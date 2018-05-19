@@ -200,7 +200,15 @@ exports.homePage=function(req,res)
         weeks[i-1]=i;
     }
     
-    sql="SELECT * from books WHERE week=1";
+    if(!position)
+    {
+        sql=`CALL update_diff('${user}',1); SELECT * from books WHERE week=1`;
+    }
+    else
+    {
+        sql=`SELECT * from books WHERE week=1`;
+    }
+
     db.query(sql,function(err,result){
         if(err)
         {
@@ -230,7 +238,7 @@ exports.getTableData = function(req,res)
     var sql=`SELECT * FROM (SELECT * FROM books WHERE user ='${user}' AND week =${week}) b
              LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
              JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_target,ytd_difference,user from books_ytd) as b3 
-             ON b2.ftype_week = b3.ftype_ytd
+             ON b2.ftype_week = b3.ftype_ytd AND b3.user = b.user
             `;
     
     db.query(sql,function(err,result)
@@ -259,13 +267,26 @@ exports.updateTable=function(req,res)
     let week=req.body.week;
     let user=req.session.user;
     o_user=user;
+
+    let position= req.session.position == "manager";
+
+    let add_on= ``;
+    if(position)
+    {
+        add_on= ``;
+    }
+    else
+    {
+        add_on= `CALL update_diff('${user}',${week});`;
+    }
     //console.log("week= "+week);
 
     //var sql="SELECT loans,deposits,debit_cards,membership,iTransact,FIP,day FROM books WHERE week="+week+"";
-    var sql=`SELECT * FROM (SELECT * FROM books WHERE user ='${user}' AND week =${week}) b
+    var sql=`
+    SELECT * FROM (SELECT * FROM books WHERE user ='${user}' AND week =${week}) b
     LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
     JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_target,ytd_difference,user from books_ytd) as b3 
-    ON b2.ftype_week = b3.ftype_ytd`;
+    ON b2.ftype_week = b3.ftype_ytd AND b3.user = b.user`;
 
     db.query(sql,function(err,result)
     {
@@ -343,9 +364,9 @@ exports.updateDB=function(req,res)
 
     let user = req.session.user;
 
-    all_sql={0: "SELECT * FROM books WHERE day = "+day+" AND week = "+week,
-             2: "SELECT weekly_target FROM books_weekly WHERE wweek = "+week,
-             5: "SELECT ytd_target FROM books_ytd"};
+    all_sql={0: `SELECT * FROM books WHERE day = ${day} AND week = ${week} AND user= '${user}'`,
+             2: `SELECT weekly_target FROM books_weekly WHERE wweek = ${week} AND user= '${user}'`,
+             5: `SELECT ytd_target FROM books_ytd WHERE user= '${user}'`};
 
     let sql="SELECT * FROM books WHERE day = "+day+" AND week = "+week;
     sql=all_sql[rtype];
@@ -433,12 +454,12 @@ exports.updateDB=function(req,res)
                     cols[2]="ytd_target";
                 }
 
-                sql= `INSERT INTO ${table}(${cols[0]},${cols[1]},${cols[2]},user) VALUES ('loans',${week},${loans},${user}),
-                     ('deposits',${week},${deposits},${user}),
-                     ('debit_cards',${week},${cards},${user}),
-                     ('membership',${week},${membership},${user}),
-                     ('iTransact',${week},${iTransact},${user}),
-                     ('FIP',${week},${FIP},${user})`;
+                sql= `INSERT INTO ${table}(${cols[0]},${cols[1]},${cols[2]},user) VALUES ('loans',${week},${loans},'${user}'),
+                     ('deposits',${week},${deposits},'${user}'),
+                     ('debit_cards',${week},${cards},'${user}'),
+                     ('membership',${week},${membership},'${user}'),
+                     ('iTransact',${week},${iTransact},'${user}'),
+                     ('FIP',${week},${FIP},'${user}')`;
                 values=[[]];
             }
 

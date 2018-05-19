@@ -202,19 +202,19 @@ $(document).ready(function(e){
                 console.log("success");
             });
         }
-
-        $("#add_user_btn").click(function(){
-            $.post("/register",$("add_user_form").serialize(),function(data){
-                console.log("data: "+data);
-                $("#add_result").html('<label class="text-white bg-success text-center w-100 p-3">'+"s"+'</label>');
-            });
-        });
-
-        $("#logout").click(function(){
-            $.post("/logout",function(data){
-                location.replace("/login");
-            });
-        });
     }
+    
+    $("#add_user_btn").click(function(){
+        $.post("/register",$("#add_user_form").serialize(),function(data){
+            console.log("data: "+data);
+            $("#add_result").html('<label class="text-white bg-success text-center w-100 p-3">'+"s"+'</label>');
+        });
+    });
+
+    $("#logout").click(function(){
+        $.post("/logout",function(data){
+            location.replace("/login");
+        });
+    });
 });
 
