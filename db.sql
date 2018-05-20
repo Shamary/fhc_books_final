@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS books_weekly
     ftype_week ENUM('loans','deposits','debit_cards','membership','iTransact','FIP') NOT NULL,
     wweek int(2) NOT NULL,
     weekly_actual float(14,2),
-    weekly_target float(14,2),
+    /*weekly_target float(14,2),*/
     weekly_difference float(14,2),
     user varchar(30) NOT NULL,
     PRIMARY KEY (ftype_week,wweek,user),
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS books_ytd
     ftype_ytd ENUM('loans','deposits','debit_cards','membership','iTransact','FIP') NOT NULL,
     yweek int(2) NOT NULL,
     ytd_actual float(14,2),
-    ytd_target float(14,2),
+    /*ytd_target float(14,2),*/
     ytd_difference float(14,2),
     user varchar(30) NOT NULL,
     PRIMARY KEY (ftype_ytd,user),
@@ -80,4 +80,16 @@ CREATE TABLE IF NOT EXISTS manager_table
     week_or_eoy int(1),
     PRIMARY KEY(manager,bsr_name,week_or_eoy),
     CONSTRAINT FOREIGN KEY (bsr_name) REFERENCES user(_username) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS targets
+(
+    manager varchar(30) NOT NULL,
+    bsr_name varchar(30) NOT NULL,
+    week_or_eoy int(1) NOT NULL,
+    ftype ENUM('loans','deposits','debit_cards','membership','iTransact','FIP') NOT NULL,
+    _target FLOAT(14,2),
+    PRIMARY KEY (manager,bsr_name,ftype,week_or_eoy),
+    CONSTRAINT FOREIGN KEY (manager) REFERENCES manager_table(manager),
+    CONSTRAINT FOREIGN KEY (bsr_name) REFERENCES user(_username)
 );

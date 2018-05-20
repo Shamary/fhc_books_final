@@ -41,15 +41,15 @@
             </div>
     </nav>
     <!---Edit Targets (row)--->
-    <div id="popup_trigger" class="overlay text-white">
-        <div class="popup bg-dark" style="height: 460px">
+    <div id="edit_targets" class="overlay text-white">
+        <div class="assign_popup bg-dark" style="height: 460px">
             <a class="close" href="#"><!--&times;-->X</a>
             <div><h5 class="text-white">Edit Targets</h5></div>
             <div class="offset-sm-1 edit_content">
                 <form id="edit_form" method="POST" action="/update_targets">
                     <input id="rtype" type="hidden" name="rtype" value="0">
                     <input id="bsr" type="hidden" name="bsr"/>
-                    <input class="w_or_y" type="hidden" name="week_or_eoy" value="0">
+                    <input class="w_or_y" type="hidden" name="week_or_eoy" value="1">
 
                     <div class="row offset-sm-4">
                         <label>Loans</label>
@@ -106,7 +106,7 @@
             <div><h5 class="text-white">Assign BSR Targets</h5></div>
             <div class="offset-sm-1 edit_content">
                 <form id="assign_form" method="POST" action="/assign">
-                    <input id="week_or_eoy" class="w_or_y" type="hidden" name="week_or_eoy"/>
+                    <input id="week_or_eoy" class="w_or_y" type="hidden" name="week_or_eoy" value="1"/>
                     <div class="row offset-sm-4 mt-3">
                         <label>BSR</label>
                     </div>
@@ -208,6 +208,7 @@
                 <th>Membership</th>
                 <th>iTransact</th>
                 <th>FIP</th>
+                <th></th>
                 <th></th>
             </tr>
         </thead>

@@ -72,13 +72,20 @@ $(document).ready(function(){
                     data:null,
                     render:function(o)
                     {
-                        return "<a href='#popup_trigger'><span class='edit_btn' style='cursor:pointer'>&#x270E;</span></a>";
+                        return "<a href='#edit_targets'><span class='edit_btn' style='cursor:pointer; font-size:14pt;'>&#x270E;</span></a>";
                     }
                 },
+                {
+                    data:null,
+                    render: function(o)
+                    {
+                        return "<span class='text-secondary del_btn' style='cursor:pointer; font-size:13pt;'>X</span>";
+                    }
+                }
             ],
             columnDefs:[
                 {
-                    targets: [1,9],
+                    targets: [1,9,10],
                     orderable:false
                 }
             ]
@@ -104,6 +111,14 @@ $(document).ready(function(){
                 $("#membership").val(row.membership);
                 $("#iTransact").val(row.iTransact);
                 $("#fip").val(row.FIP);
+            }
+        });
+
+        $("#manager_table").click(function(e){
+            if($(e.target.hasClass('del_btn')))
+            {
+                let row = m_table.row($(e.target).closest("tr")).data();
+                var bsr=row.bsr_name;
             }
         });
         

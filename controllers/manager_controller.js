@@ -16,7 +16,7 @@ var getBSRs = function(req,res,to,user,position)
             bsrs[i]=result[i]._username;
         }
 
-        res.render('manager',{title:"Targets", user:user, manager:position, bsr:bsrs});
+        res.render('manager',{title:"Proposed Targets", user:user, manager:position, bsr:bsrs});
     });
 }
 
@@ -63,11 +63,12 @@ exports.assign_to_BSR = function(req,res)
     let itransact= req.body.itransact;
     let fip = req.body.fip;
 
-    let week_or_eoy= req.b
+    let week_or_eoy= req.body.week_or_eoy;
 
     let sql=`CALL assign_to_bsr('${user}','${bsr}',${loans},${deposits},${cards},${members},${itransact},${fip},${week_or_eoy})`;
 
     db.query(sql,function(err){
+        console.log("query: "+sql);
         if(err)
         {
             throw err;
