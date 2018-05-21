@@ -1,5 +1,7 @@
 'use strict';
 
+let date=new Date();
+
 function getDateRangeOfWeek(weekNo,addOn){
     var d1 = new Date();
     let numOfdaysPastSinceLastMonday = eval(d1.getDay()- 1);
@@ -38,6 +40,7 @@ $(document).ready(function(e){
         
         var week=1;
 
+        set_to_cur_week();
         var table=$("#books_table").DataTable({
             ordering:false,
             dom:"Bfrtip",
@@ -129,6 +132,8 @@ $(document).ready(function(e){
         
         setDate();
         selWeek(table);
+        removeCpy("#sel_week");
+
         $("#sel_bsr").change(function(){
             count=0;
             table.ajax.reload();
@@ -141,7 +146,13 @@ $(document).ready(function(e){
                 count=0;
                 table.ajax.url("/books_update").load();
                 setDate();
+                removeCpy("#sel_week");
             });
+        }
+
+        function set_to_cur_week()
+        {
+            $("#sel_week").val(date.getWeek());
         }
 
         function setDate()
@@ -245,5 +256,18 @@ $(document).ready(function(e){
             location.replace("/login");
         });
     });
+
+    function removeCpy(id)
+    {
+        var usedNames = {};
+        $(id).each(function () {
+            if(usedNames[this.text]) {
+                $(this).remove();
+            } else {
+                usedNames[this.text] = this.value;
+            }
+        });
+    }
+
 });
 

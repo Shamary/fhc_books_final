@@ -261,7 +261,7 @@ exports.getTableData = function(req,res)
 
     let bsr_to_view= req.body.bsr_to_view;
 
-    //console.log("week= "+week);
+    console.log("week= "+week);
     var sql=`SELECT * FROM (SELECT * FROM books WHERE user ='${user}' AND week =${week}) b
              LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
              JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_difference,user from books_ytd) as b3 
