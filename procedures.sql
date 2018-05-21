@@ -46,9 +46,6 @@ BEGIN
     CALL update_diff(_user,_week,'membership');
     CALL update_diff(_user,_week,'iTransact');
     CALL update_diff(_user,_week,'FIP');
-    /*
-    UPDATE books_weekly SET weekly_difference = IF(weekly_target IS NULL,-weekly_actual,weekly_target-weekly_actual) 
-    WHERE user=_user AND wweek=_week;*/
 
     CALL update_ytd_auto(_user);
 END //
@@ -58,10 +55,6 @@ DELIMITER //
 CREATE PROCEDURE
 update_diff(IN _user varchar(30),IN _week int(2), IN _ftype ENUM('loans','deposits','debit_cards','membership','iTransact','FIP'))
 BEGIN
-
-    /*SELECT IF(b.weekly_actual IS NULL,a._target,a._target - b.weekly_actual) as diff FROM targets a,books_weekly b
-    WHERE a.bsr_name = _user AND a.week_or_eoy = 1 AND b.wweek = 1 AND b.ftype_week = a.ftype AND b.user=_user;*/
-
     UPDATE books_weekly SET weekly_difference =( 
     SELECT diff FROM 
     (SELECT IF(b.weekly_actual IS NULL,a._target,a._target - b.weekly_actual) as diff FROM targets a,books_weekly b
@@ -184,17 +177,6 @@ BEGIN
         (_manager,bsr,_week_or_eoy,'deposits',_deposits),(_manager,bsr,_week_or_eoy,'debit_cards',_debit_cards),
         (_manager,bsr,_week_or_eoy,'membership',_membership),(_manager,bsr,_week_or_eoy,'iTransact',_iTransact),
         (_manager,bsr,_week_or_eoy,'FIP',_fip);
-    /*
-    INSERT INTO books(week,day,loans,deposits,debit_cards,membership,iTransact,FIP,user) VALUES(1,1,0,0,0,0,0,0,bsr);
-    IF _week_or_eoy = 1 THEN
-        INSERT INTO books_weekly(ftype_week,wweek,weekly_target,user) VALUES ('loans',1,_loans,bsr),('deposits',1,_deposits,bsr)
-        ,('debit_cards',1,_debit_cards,bsr),('membership',1,_membership,bsr),('iTransact',1,_iTransact,bsr)
-        ,('FIP',1,_FIP,bsr);
-    ELSE
-        INSERT INTO books_ytd(ftype_ytd,ytd_target,user) VALUES ('loans',_loans,bsr),('deposits',_deposits,bsr)
-        ,('debit_cards',_debit_cards,bsr),('membership',_membership,bsr),('iTransact',_iTransact,bsr)
-        ,('FIP',_FIP,bsr);
-    END IF;*/
 
     CALL after_assign(_manager,bsr,w_or_y,vbranch,_position);
     CALL update_weekly_auto(1,bsr);
@@ -207,6 +189,10 @@ after_assign(IN _manager varchar(30), IN _bsr varchar(30),_week_or_eoy int(1),IN
 BEGIN
     INSERT IGNORE INTO manager_table (manager,branch,bsr_name,position,loans,deposits,debit_cards,membership,iTransact,FIP,week_or_eoy)
     VALUES (_manager,_branch,_bsr,_position,0,0,0,0,0,0,_week_or_eoy);
+
+    INSERT IGNORE INTO targets (manager,bsr_name,week_or_eoy,ftype,_target) VALUES (_manager,_bsr,_week_or_eoy,'loans',0),
+    (_manager,_bsr,_week_or_eoy,'deposits',0),(_manager,_bsr,_week_or_eoy,'debit_cards',0),(_manager,_bsr,_week_or_eoy,'membership',0),
+    (_manager,_bsr,_week_or_eoy,'iTransact',0), (_manager,_bsr,_week_or_eoy,'FIP',0);
 END //
 DELIMITER ;
 
@@ -226,22 +212,6 @@ BEGIN
     UPDATE targets SET _target = _membership WHERE ftype = 'membership' AND bsr_name = _bsr AND week_or_eoy = _week_or_eoy;
     UPDATE targets SET _target = _iTransact WHERE ftype = 'iTransact' AND bsr_name = _bsr AND week_or_eoy = _week_or_eoy;
     UPDATE targets SET _target = _FIP WHERE ftype = 'FIP' AND bsr_name = _bsr AND week_or_eoy = _week_or_eoy;
-    /*
-    IF _week_or_eoy = 1 THEN
-        UPDATE books_weekly SET weekly_target = _loans WHERE ftype_week = 'loans' AND user = _bsr;
-        UPDATE books_weekly SET weekly_target = _deposits WHERE ftype_week = 'deposits' AND user = _bsr;
-        UPDATE books_weekly SET weekly_target = _debit_cards WHERE ftype_week = 'debit_cards' AND user = _bsr;
-        UPDATE books_weekly SET weekly_target = _membership WHERE ftype_week = 'membership' AND user = _bsr;
-        UPDATE books_weekly SET weekly_target = _iTransact WHERE ftype_week = 'iTransact' AND user = _bsr;
-        UPDATE books_weekly SET weekly_target = _FIP WHERE ftype_week = 'FIP' AND user = _bsr; 
-    ELSE
-        UPDATE books_ytd SET ytd_target = _loans WHERE ftype_ytd = 'loans' AND user = _bsr;
-        UPDATE books_ytd SET ytd_target = _deposits WHERE ftype_ytd = 'deposits' AND user = _bsr;
-        UPDATE books_ytd SET ytd_target = _debit_cards WHERE ftype_ytd = 'debit_cards' AND user = _bsr;
-        UPDATE books_ytd SET ytd_target = _membership WHERE ftype_ytd = 'membership' AND user = _bsr;
-        UPDATE books_ytd SET ytd_target = _iTransact WHERE ftype_ytd = 'iTransact' AND user = _bsr;
-        UPDATE books_ytd SET ytd_target = _FIP WHERE ftype_ytd = 'FIP' AND user = _bsr;
-    END IF;*/
 
     CALL update_weekly_auto(1,_bsr);
 END //
@@ -249,16 +219,3 @@ DELIMITER ;
 
 /******************CALLS***************/
 CALL update_weekly_auto(1,"bsr1");
-
-/*
-select * from (select * from books_weekly where wweek=1) b 
-JOIN (select ftype_ytd as ftype_week,yweek,ytd_actual,ytd_target,ytd_difference,user from books_ytd) as t2 
-ON b.ftype_week=t2.ftype_week AND b.user = t2.user
-RIGHT JOIN books b0 ON b0.user=b.user;
-
-SELECT * FROM (SELECT * FROM books WHERE user ='bsr1' AND week =1) b
-LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
-JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_target,ytd_difference,user from books_ytd) as b3 ON b2.ftype_week = b3.ftype_ytd; 
-
-
-select * from books_weekly b JOIN (select * from books_ytd) as t2 ON t2.user=b.user;*/

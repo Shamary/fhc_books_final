@@ -1,3 +1,35 @@
+Date.prototype.getWeek = function () {
+    var target  = new Date(this.valueOf());
+    var dayNr   = (this.getDay() + 6) % 7;
+    target.setDate(target.getDate() - dayNr + 3);
+    var firstThursday = target.valueOf();
+    target.setMonth(0, 1);
+    if (target.getDay() != 4) {
+        target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+    }
+    return 1 + Math.ceil((firstThursday - target) / 604800000);
+}
+
+var edit_map = {1:"Edit Targets - Weekly",2: "Edit Targets - EOY"};
+var assign_map = {1:"Assign Targets - Weekly", 2:"Assign Targets - EOY"};
+
+/*
+function getDateRangeOfWeek(weekNo){
+    var d1 = new Date();
+    numOfdaysPastSinceLastMonday = eval(d1.getDay()- 1);
+    d1.setDate(d1.getDate() - numOfdaysPastSinceLastMonday);
+    var weekNoToday = d1.getWeek();
+    var weeksInTheFuture = eval( weekNo - weekNoToday );
+    d1.setDate(d1.getDate() + eval( 7 * weeksInTheFuture ));
+    var rangeIsFrom = eval(d1.getMonth()+1) +"/" + d1.getDate() + "/" + d1.getFullYear();
+    d1.setDate(d1.getDate() + 6);
+    var rangeIsTo = eval(d1.getMonth()+1) +"/" + d1.getDate() + "/" + d1.getFullYear() ;
+    //return rangeIsFrom + " to "+rangeIsTo;
+    return d1.getDate();
+};
+
+console.log("dates: "+getDateRangeOfWeek(20));*/
+
 $(document).ready(function(){
 
     if($("#manager_table").length)
@@ -79,7 +111,7 @@ $(document).ready(function(){
                     data:null,
                     render: function(o)
                     {
-                        return "<span class='text-secondary del_btn' style='cursor:pointer; font-size:13pt;'>X</span>";
+                        return "<span class='text-danger del_btn' style='cursor:pointer; font-size:13pt;'>X</span>";
                     }
                 }
             ],
@@ -91,13 +123,19 @@ $(document).ready(function(){
             ]
         });
 
-
+        getWeeksLeft();
         $("#_sel").change(function(){
-            $(".w_or_y").val($("#_sel").val());
+
+            let val=$("#_sel").val()
+            $(".w_or_y").val(val);
+
+            $("#assign_label").text(assign_map[val]);
+            $("#edit_label").text(edit_map[val]);
+
             m_table.ajax.reload();
         });
 
-        $("#manager_table").click(function(event){//edit targets
+        $("#manager_table").click(function(event){//edit/delete targets
             if($(event.target).hasClass("edit_btn"))
             {
                 let row= m_table.row($(event.target).closest("tr")).data();
@@ -112,20 +150,30 @@ $(document).ready(function(){
                 $("#iTransact").val(row.iTransact);
                 $("#fip").val(row.FIP);
             }
-        });
-
-        $("#manager_table").click(function(e){
-            if($(e.target.hasClass('del_btn')))
+            else
             {
-                let row = m_table.row($(e.target).closest("tr")).data();
-                var bsr=row.bsr_name;
+                if($(event.target).hasClass('del_btn'))//delete
+                {
+                    let row = m_table.row($(event.target).closest("tr")).data();
+                    let bsr=row.bsr_name;
+
+                    $.post('/delete',{bsr:bsr},function(data){
+                        m_table.ajax.reload();
+                    });
+                }
             }
         });
-        
     }
     
 
     $("#targets").click(function(){
         window.location.replace('/manager');
     });
+
+    function getWeeksLeft()
+    {
+        var d= new Date();
+
+        $("#weeks_left").text((52-d.getWeek())+"");
+    }
 });

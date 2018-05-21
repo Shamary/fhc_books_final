@@ -19,6 +19,9 @@
             <span class="text-dark">[</span><label class="text-primary">{{user}}</label><span class="text-dark">]</span>
         </div>
     </div>
+    <div class="info_div">
+        <span class="text-info">Number of weeks remaining for EOY <label id="weeks_left"></label></span>
+    </div>
 
     <!---Drop Down Options--->
     <nav class="navbar navbar-dark bg-dark text-white" id="option">
@@ -44,7 +47,7 @@
     <div id="edit_targets" class="overlay text-white">
         <div class="assign_popup bg-dark" style="height: 460px">
             <a class="close" href="#"><!--&times;-->X</a>
-            <div><h5 class="text-white">Edit Targets</h5></div>
+            <div><h5 id="edit_label" class="text-white">Edit Targets - Weekly</h5></div>
             <div class="offset-sm-1 edit_content">
                 <form id="edit_form" method="POST" action="/update_targets">
                     <input id="rtype" type="hidden" name="rtype" value="0">
@@ -103,7 +106,7 @@
         </div>
         <div class="assign_popup bg-dark">
             <a class="close" href="#"><!--&times;-->X</a>
-            <div><h5 class="text-white">Assign BSR Targets</h5></div>
+            <div><h5 id="assign_label" class="text-white">Assign Targets - Weekly</h5></div>
             <div class="offset-sm-1 edit_content">
                 <form id="assign_form" method="POST" action="/assign">
                     <input id="week_or_eoy" class="w_or_y" type="hidden" name="week_or_eoy" value="1"/>

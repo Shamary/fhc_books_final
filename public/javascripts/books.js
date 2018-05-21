@@ -1,5 +1,19 @@
 'use strict';
 
+function getDateRangeOfWeek(weekNo,addOn){
+    var d1 = new Date();
+    let numOfdaysPastSinceLastMonday = eval(d1.getDay()- 1);
+    d1.setDate(d1.getDate() - numOfdaysPastSinceLastMonday);
+    var weekNoToday = d1.getWeek();
+    var weeksInTheFuture = eval( weekNo - weekNoToday );
+    d1.setDate(d1.getDate() + eval( 7 * weeksInTheFuture ));
+    var rangeIsFrom = eval(d1.getMonth()+1) +"/" + (d1.getDate()+addOn) + "/" + d1.getFullYear();
+    d1.setDate(d1.getDate() + 6);
+    var rangeIsTo = eval(d1.getMonth()+1) +"/" + d1.getDate() + "/" + d1.getFullYear() ;
+    //return rangeIsFrom + " to "+rangeIsTo;
+    return rangeIsFrom;
+};
+
 $(document).ready(function(e){
    
     if($("#books_table").length)
@@ -37,7 +51,7 @@ $(document).ready(function(e){
                 {
                     //week=$("#sel_week").val();
                     //return JSON.stringify({week:week});
-                    let week0={week:$("#sel_week").val()};
+                    let week0={week:$("#sel_week").val(), bsr_to_view: $("#sel_bsr").val()};
                     return week0;
                 },
                 dataSrc:'',
@@ -90,6 +104,7 @@ $(document).ready(function(e){
             }
 
             $("#day").text(days[pos]);
+            $("#d_date").text($(this).find("span").text());
 
             $("#day0").val(pos);
             $("#week").val($("#sel_week").val());
@@ -112,24 +127,38 @@ $(document).ready(function(e){
             table.column(pos).data();
         }*/
         
+        setDate();
         selWeek(table);
+        $("#sel_bsr").change(function(){
+            count=0;
+            table.ajax.reload();
+        });
         //setActual();
 
         function selWeek(table)//select week
         {
             $("#sel_week").change(function(){
                 count=0;
-                table.ajax.url("/books_update").load(/*todo_on_load*/);
-                $.post('/update_headings',{week:$("#sel_week").val()},function(result){
-
-                    //console.log("result= "+result.mdate);
-                    $("#mdate").text(result.mdate);
-                    $("#tdate").text(result.tdate);
-                    $("#wdate").text(result.wdate);
-                    $("#thdate").text(result.thdate);
-                    $("#fdate").text(result.fdate);
-                });
+                table.ajax.url("/books_update").load();
+                setDate();
             });
+        }
+
+        function setDate()
+        {
+            $("#mdate").text(getDateRangeOfWeek($("#sel_week").val(),0));
+            $("#tdate").text(getDateRangeOfWeek($("#sel_week").val(),1));
+            $("#wdate").text(getDateRangeOfWeek($("#sel_week").val(),2));
+            $("#thdate").text(getDateRangeOfWeek($("#sel_week").val(),3));
+            $("#fdate,#weekly_date").text(getDateRangeOfWeek($("#sel_week").val(),4));
+        }
+
+        function selBSR()
+        {
+            $("#sel_bsr").change(function(){
+                table.ajax.url().load();
+            });
+            
         }
 
         function todo_on_load()

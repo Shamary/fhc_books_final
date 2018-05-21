@@ -1,7 +1,7 @@
 <div class="container-fluid home">
     <!---week selection--->
     <div class="row">
-        <div class="bg-dark text-white week_cont">
+        <div class="bg-dark text-white week_cont" {{#unless manager}}style="margin-bottom: 90px;"{{/unless}}>
             <label class="week_label offset-sm-1">Week #</label>
             <form id="sel_form" method="POST" action="/books_update">
                 <select name="week" id="sel_week" class="offset-sm-3 bg-secondary text-white" style="width:50px">
@@ -16,6 +16,18 @@
         <div class="user_div offset-sm-3 col-sm-3 text-center">
             <span class="text-dark">[</span><label class="text-primary">{{user}}</label><span class="text-dark">]</span>
         </div>
+    </div>
+    <div class="row">
+        {{#if manager}}
+            <div class="bg-dark text-white week_cont" style="margin-bottom: 90px; border-bottom-right-radius: 5px;">
+                <!--<label class="offset-sm-1 week_label">BSR</label><br>-->
+                    <select id="sel_bsr" name="bsr_name" class="offset-sm-1 text-white text-center bg-secondary mt-2" style="width:120px">
+                        {{#each my_bsrs}}
+                            <option value={{this}}>{{this}}</option>
+                        {{/each}}
+                    </select>
+            </div>
+        {{/if}}
     </div>
 
     <!---Drop Down Options--->
@@ -42,19 +54,22 @@
     <div id="popup_trigger" class="overlay text-white">
         <div class="popup bg-dark">
             <a class="close" href="#"><!--&times;-->X</a>
-            <div><h5 class="text-white" id="day"></h5></div>
+            <div>
+                <h5 class="text-white" id="day" style="display:inline-block"></h5>
+                <h6 id="d_date" style="display:inline-block" class="text-white offset-sm-1"></h6>
+            </div>
             <div class="offset-sm-1 edit_content">
                 <form id="edit_form" method="POST" action="/update_db">
                     <input id="day0" type="hidden" name="day" value=""/>
                     <input id="week" type="hidden" name="week" value=""/>
                     <input id="rtype" type="hidden" name="rtype" value="0">
                     
-                    <div id="date_label" class="row offset-sm-4">
+                    <!--<div id="date_label" class="row offset-sm-4">
                         <label>Date</label>
                     </div>
                     <div class="row">
                         <input id="date" type="date" name="date" class="input_div" min="2018-01-01" required/>
-                    </div>
+                    </div>-->
                     
                     <div class="row offset-sm-4">
                         <label>Loans</label>
@@ -146,14 +161,14 @@
         <thead>
             <tr>
                 <th></th>
-                <th><span id="mdate">{{mdate}}</span><br> Mon <a href="#popup_trigger">&#x270E;</a></th>
-                <th><span id="tdate">{{tdate}}</span><br> Tue <a href="#popup_trigger">&#x270E;</a></th>
-                <th><br><span id="wdate">{{wdate}}</span><br> Wed <a href="#popup_trigger">&#x270E;</a></th>
-                <th><span id="thdate">{{thdate}}</span><br> Thur <a href="#popup_trigger">&#x270E;</a></th>
-                <th><span id="fdate">{{fdate}}</span><br> Fri <a href="#popup_trigger">&#x270E;</a></th>
+                <th><span id="mdate"></span><br> Mon {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
+                <th><span id="tdate"></span><br> Tue {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
+                <th><br><span id="wdate"></span><br> Wed {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
+                <th><span id="thdate"></span><br> Thur {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
+                <th><span id="fdate"></span><br> Fri {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
                 <th>Actual <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
                 <th>Target <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
-                <th><span id="weekly_date">{{fdate}}</span><br> Difference <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th><span id="weekly_date"></span><br> Difference <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
                 <th>Actual <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
                 <th>Target <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
                 <th><span id="ytd_date"></span><br> Difference <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>

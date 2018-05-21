@@ -3,7 +3,7 @@
 }*/
 
 .top_div{
-    margin-bottom: 60px;
+    margin-bottom: 70px;
 }
 
 #home_btn{
@@ -34,4 +34,13 @@
       border-radius: 5px;
       outline:none;
       height: 23px;
+  }
+
+  .info_div{
+      margin-bottom: 50px;
+      font-size: 14pt;
+  }
+
+  #weeks_left{
+      font-weight: bold;
   }

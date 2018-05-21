@@ -18,6 +18,7 @@ router.get('/manager',auth.isLoggedIn,auth.isManager,manager.managerPage);
 router.post('/targets',auth.isLoggedIn,auth.isManager,manager.targetTable);
 router.post('/assign',auth.isLoggedIn,auth.isManager,manager.assign_to_BSR);
 router.post('/update_targets',auth.isLoggedIn,auth.isManager,manager.update_targets);
+router.post('/delete',auth.isLoggedIn,auth.isManager,manager.delete);
 
 /**Auth**/
 router.get('/login',auth.loginPage);

@@ -4,7 +4,7 @@ var getBSRs = function(req,res,to,user,position)
 {
     let bsrs=[];
 
-    sql=`SELECT * FROM user WHERE position = 'bsr' AND _username NOT IN(SELECT user FROM books)`;
+    sql=`SELECT * FROM user WHERE position = 'bsr' AND _username NOT IN(SELECT bsr_name FROM manager_table)`;
     db.query(sql,function(err,result){
         if(err)
         {
@@ -100,5 +100,21 @@ exports.update_targets = function(req,res)
         }
 
         res.redirect('/manager');
+    });
+}
+
+exports.delete = function(req,res)
+{
+    let user=req.session.user;
+    let bsr=req.body.bsr;
+
+    let sql= `DELETE FROM manager_table WHERE bsr_name = '${bsr}' AND manager = '${user}'`;
+    db.query(sql,function(err){
+        if(err)
+        {
+            throw err;
+        }
+
+        res.status(200).send("delete OK");
     });
 }
