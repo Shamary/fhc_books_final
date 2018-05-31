@@ -58,15 +58,16 @@ CREATE TABLE IF NOT EXISTS books
     membership int NOT NULL,
     iTransact int NOT NULL,
     FIP int NOT NULL,
+    sold float(8,2) NOT NULL,
     user varchar(30) NOT NULL,
     CONSTRAINT FOREIGN KEY (user) REFERENCES manager_table(bsr_name) ON DELETE CASCADE
 ) ENGINE = InnoDB;
 
-INSERT IGNORE INTO books VALUES(1,"2018-01-02",1,22434.0,234234,1,9,3,0,"bsr1");
-INSERT IGNORE INTO books VALUES(1,"2018-01-03",2,3434.0,56565,3,9,9,0,"bsr1");
-INSERT IGNORE INTO books VALUES(1,"2018-01-04",3,2026131.0,4354,7,4,0,0,"bsr1");
-INSERT IGNORE INTO books VALUES(1,"2018-01-05",4,3434.0,34534,8,3,0,0,"bsr1");
-INSERT IGNORE INTO books VALUES(1,"2018-01-06",5,1008850.0,435545,8,3,10,0,"bsr1");
+/*INSERT IGNORE INTO books VALUES(1,1,22434.0,234234,1,9,3,0,"bsr1");
+INSERT IGNORE INTO books VALUES(1,2,3434.0,56565,3,9,9,0,"bsr1");
+INSERT IGNORE INTO books VALUES(1,3,2026131.0,4354,7,4,0,0,"bsr1");
+INSERT IGNORE INTO books VALUES(1,4,3434.0,34534,8,3,0,0,"bsr1");
+INSERT IGNORE INTO books VALUES(1,5,1008850.0,435545,8,3,10,0,"bsr1");*/
 
 CREATE TABLE IF NOT EXISTS books_weekly
 (
@@ -93,4 +94,16 @@ CREATE TABLE IF NOT EXISTS books_ytd
     CONSTRAINT FOREIGN KEY (user) REFERENCES manager_table(bsr_name) ON DELETE CASCADE/*,
     CONSTRAINT FOREIGN KEY(yweek) references books(week) ON DELETE CASCADE*/
 ) ENGINE = InnoDB;
+
+/*
+CREATE TABLE IF NOT EXISTS products_sold
+(
+    puser varchar(30) NOT NULL, 
+    pweek int(2) NOT NULL,
+    pday int(1) NOT NULL,
+    sold float(8,2) NOT NULL,
+    p_weekly_actual FLOAT(8,2),
+    PRIMARY KEY (puser,pweek),
+    CONSTRAINT FOREIGN KEY (puser) REFERENCES manager_table(bsr_name) ON DELETE CASCADE
+) ENGINE = InnoDB;*/
 

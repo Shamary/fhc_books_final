@@ -3,17 +3,21 @@
 let date=new Date();
 
 function getDateRangeOfWeek(weekNo,addOn){
+    let prev_month = 0;
+
     var d1 = new Date();
     let numOfdaysPastSinceLastMonday = eval(d1.getDay()- 1);
     d1.setDate(d1.getDate() - numOfdaysPastSinceLastMonday);
     var weekNoToday = d1.getWeek();
     var weeksInTheFuture = eval( weekNo - weekNoToday );
     d1.setDate(d1.getDate() + eval( 7 * weeksInTheFuture ));
-    var rangeIsFrom = eval(d1.getMonth()+1) +"/" + (d1.getDate()+addOn) + "/" + d1.getFullYear();
-    d1.setDate(d1.getDate() + 6);
+
+    var rangeIsFrom = eval(d1.getMonth()+1) +"/" + (d1.getDate()) + "/" + d1.getFullYear();
+    
+    d1.setDate(d1.getDate() + addOn);
     var rangeIsTo = eval(d1.getMonth()+1) +"/" + d1.getDate() + "/" + d1.getFullYear() ;
     //return rangeIsFrom + " to "+rangeIsTo;
-    return rangeIsFrom;
+    return rangeIsTo;
 };
 
 $(document).ready(function(e){
@@ -26,7 +30,7 @@ $(document).ready(function(e){
             YTD_ACTUAL = 4, YTD_TARGET = 5, YTD_DIFF = 6;
 
         
-        var labels=["Loans", "Deposits","Debit Cards","Membership","iTransact","FIP"];
+        var labels=["Loans", "Deposits","Debit Cards","Membership","iTransact","FIP","Products Sold"];
         
         var actual_labels = {0:"actual_loans", 1:"actual_deposits",2:"actual_cards",3:"actual_membership",4:"actual_itransact",5:"actual_fip"};
         var diff_labels= {0:"diff_loans", 1:"diff_deposits",2:"diff_cards",3:"diff_membership",4:"diff_itransact",5:"diff_fip"};

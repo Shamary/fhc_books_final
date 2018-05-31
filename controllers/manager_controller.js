@@ -16,7 +16,7 @@ var getBSRs = function(req,res,to,user,position)
             bsrs[i]=result[i]._username;
         }
 
-        res.render('manager',{title:"Proposed Targets", user:user, manager:position, bsr:bsrs});
+        res.render('manager',{layout:'layout2',title:"Proposed Targets", user:user, manager:position, bsr:bsrs});
     });
 }
 

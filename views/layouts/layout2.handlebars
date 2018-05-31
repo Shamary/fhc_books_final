@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{{title}}</title>
+    <link rel="stylesheet" type="text/css" href="DataTables/datatables.min.css"/>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/manager.css' />
+    <link rel='stylesheet' href='/stylesheets/login.css' />
+ 
+    <script src="javascripts/popper.js"></script>
+    <script type="text/javascript" src="DataTables/datatables.min.js"></script>
+    <!--<script src="javascripts/sum.js"></script>-->
+    <script src="javascripts/moment.js"></script>
+    <script type="text/javascript" src="javascripts/manager.js"></script>
+    <script type="text/javascript" src="javascripts/books.js"></script>
+    
+  </head>
+  <body>
+    <div class="container-fluid">
+        <!---go home--->
+        <div class="row top_div">
+            <a href="/"><div id ="home_btn" class="bg-dark text-white week_cont"></div></a>
+            <!--Logged in user-->
+            <div class="user_div offset-sm-3 col-sm-3 text-center">
+                <span class="text-dark">[</span><label class="text-primary">{{user}}</label><span class="text-dark">]</span>
+            </div>
+        </div>
+        <div class="info_div">
+            <span class="text-info">Number of weeks remaining for EOY <label id="weeks_left"></label></span>
+        </div>
+
+        <!---Drop Down Options--->
+        <nav class="navbar navbar-dark bg-dark text-white" id="option">
+            <button class="navbar-toggler offset-sm-2" type="button" data-toggle="collapse" data-target="#menu" 
+            aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <!--<div class="row mt-3 options">
+                    <a class="row offset-sm-3" href="/products">Products Sold</a>
+                </div>-->
+                {{#if manager}}
+                    <div class="row mt-3 options">
+                        <a class="row offset-sm-3" href="#add_user">Add User</a>
+                    </div>
+                    <div id="targets" class="row options">
+                        <label class="row offset-sm-3">Targets</label>
+                    </div>
+                {{/if}}
+                <div id="logout" class="row options">
+                    <label class="row offset-sm-3">Logout</label>
+                </div>
+            </div>
+        </nav>
+
+        {{{body}}}
+    </div>
+    
+  </body>
+</html>

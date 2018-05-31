@@ -14,6 +14,40 @@ DROP PROCEDURE IF EXISTS ytd_diff;
 DROP PROCEDURE IF EXISTS assign_to_bsr;
 DROP PROCEDURE IF EXISTS after_assign;
 
+DROP PROCEDURE IF EXISTS set_products_sold;
+DROP PROCEDURE IF EXISTS sold_weekly_actual;
+
+DROP PROCEDURE IF EXISTS add_to_books;
+
+/****************FOR BOOKS***************/
+DELIMITER //
+CREATE PROCEDURE add_to_books
+(
+    IN _bsr varchar(30),
+    IN _week int(2), 
+    IN _day int(1),
+    IN _loans float(14,2) NOT NULL,
+    IN _deposits float(14,2) NOT NULL,
+    IN _cards int NOT NULL,
+    IN _membership int NOT NULL,
+    IN _iTransact int NOT NULL,
+    IN _FIP int NOT NULL,
+    IN _sold float(8,2) NOT NULL
+)
+BEGIN
+
+    IF NOT EXISTS (SELECT * FROM books WHERE user = _bsr AND week = _week AND day = _day) THEN
+        INSERT INTO books VALUES (_week,_day,_loans,_deposits,_cards,_membership,_iTransact,_FIP,_sold,_bsr);
+    ELSE
+        UPDATE books SET loans = _loans, deposits = _deposits, debit_cards = _cards, membership = _membership, iTransact = _iTransact, 
+                         FIP = _FIP, sold = _sold
+        WHERE user = _bsr AND week = _week AND day = _day;
+    END IF;
+
+    CALL update_weekly_auto(_week,_bsr);
+END;
+DELIMITER ;
+
 /****************UPDATES********************/
 DELIMITER //
 CREATE PROCEDURE
@@ -215,6 +249,35 @@ BEGIN
 
     CALL update_weekly_auto(1,_bsr);
 END //
+DELIMITER ;
+
+/************For products sold***************
+
+DELIMITER //
+CREATE PROCEDURE sold_weekly_actual(IN _bsr varchar(30), IN _week int(2))
+BEGIN
+    DECLARE psum float(8,2) DEFAULT 0;
+
+    SELECT SUM(sold) INTO psum FROM products_sold WHERE puser = _bsr AND pweek = _week;
+
+    UPDATE products_sold SET weekly_actual = psum;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE set_products_sold(IN _bsr varchar(30), _week int(2),IN _day int(1),IN _sold float(8,2))
+BEGIN
+    IF NOT EXISTS(SELECT * FROM products_sold WHERE puser = _bsr AND pweek = _week AND pday = _day) THEN
+        
+        INSERT INTO products_sold VALUES(_bsr,_week,_day,_sold,0);
+    ELSE
+        UPDATE products_sold SET sold = _sold WHERE puser = _bsr AND pweek = _week AND pday = _day; 
+
+    END IF;
+
+    CALL sold_weekly_actual(_bsr,_week);
+END //
+
 DELIMITER ;
 
 /******************CALLS***************/

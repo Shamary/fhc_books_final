@@ -361,7 +361,7 @@ exports.updateTable=function(req,res)
     });
 }
 
-exports.updateDateHeading=function(req,res)
+/*exports.updateDateHeading=function(req,res)
 {
     let week=req.body.week;
     //console.log("week heading= "+week);
@@ -397,7 +397,7 @@ exports.updateDateHeading=function(req,res)
         //res.status(200).send(local_res);
         res.json(local_res);
     });
-}
+}*/
 
 exports.updateDB=function(req,res)
 {
@@ -413,6 +413,8 @@ exports.updateDB=function(req,res)
     let week=req.body.week;
 
     let rtype= req.body.rtype;
+
+    let products_sold= req.body.products_sold;
 
     let user = req.session.user;
 
@@ -533,6 +535,8 @@ var setNullFinal = function()
 {
     let final=[{mon:null,tue:null,wed:null,thur:null,fri:null, weekly_actual:null, weekly_target:null, weekly_difference:null, 
                 ytd_actual:null, ytd_target:null, ytd_difference:null},
+                {mon:null,tue:null,wed:null,thur:null,fri:null, weekly_actual:null, weekly_target:null, weekly_difference:null, 
+                    ytd_actual:null, ytd_target:null, ytd_difference:null},
                 {mon:null,tue:null,wed:null,thur:null,fri:null, weekly_actual:null, weekly_target:null, weekly_difference:null, 
                     ytd_actual:null, ytd_target:null, ytd_difference:null},
                 {mon:null,tue:null,wed:null,thur:null,fri:null, weekly_actual:null, weekly_target:null, weekly_difference:null, 
