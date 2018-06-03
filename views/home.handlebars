@@ -66,6 +66,38 @@
         </div>
     </div>
 </div>
+
+<!---Edit Column For Table2--->
+<div id="t2_edit" class="overlay text-white">
+    <div class="t2_popup bg-dark">
+        <a class="close" href="#"><!--&times;-->X</a>
+        <div>
+            <h5 class="text-white" id="t2_day" style="display:inline-block"></h5>
+            <h6 id="t2_date" style="display:inline-block" class="text-white offset-sm-1"></h6>
+        </div>
+        <div class="offset-sm-1 edit_content">
+            <form id="edit_form" method="POST" action="/update_db">
+                <input id="t2_day" type="hidden" name="day" value=""/>
+                <input id="t2_week" type="hidden" name="week" value=""/>
+            
+                <div class="row offset-sm-4">
+                    <label>Contacts</label>
+                </div>
+                <div class="row">
+                    <input id="contacts" type="number" name="contacts" class="input_div" step="0.01" min="0" required/>
+                </div>
+                <div class="row offset-sm-4">
+                    <label>Leads</label>
+                </div>
+                <div class="row">
+                    <input id="leads" type="number" name="leads" class="input_div" step="0.01" min="0" required/>
+                </div>
+
+                <input type="submit" value="Update" class="offset-sm-4 mt-4 edit_button"/>
+            </form>
+        </div>
+    </div>
+</div>
 <!---ADD USER--->
 <div id="add_user" class="overlay text-white">
     <div id="add_result">
@@ -111,30 +143,63 @@
 </div>-->
 
 <!---Table-->
-<table id="books_table" class="table table-striped table-dark text-center">
-    <thead>
-        <tr>
-            <th></th>
-            <th><span id="mdate"></span><br> Mon {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
-            <th><span id="tdate"></span><br> Tue {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
-            <th><br><span id="wdate"></span><br> Wed {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
-            <th><span id="thdate"></span><br> Thur {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
-            <th><span id="fdate"></span><br> Fri {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
-            <th>Actual <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
-            <th>Target <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
-            <th><span id="weekly_date"></span><br> Difference <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
-            <th>Actual <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
-            <th>Target <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
-            <th><span id="ytd_date"></span><br> Difference <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <div class="row">
-                <h4 id="daily" class="offset-sm-3">DAILY</h4>
-                <h4 id="weekly" class="offset-sm-3">WEEKLY</h4>
-                <h4 id="ytd" class="offset-sm-2">YTD</h4>
-            </div>
-        </tr>
-    </tbody>
-</table>
+<button class="btn bg-dark col-md-12 text-white" style = "font-size:14pt" type="button" data-toggle="collapse" data-target="#t1_div" 
+aria-expanded="false" aria-controls="t1_div">
+    Table 1
+</button>
+<div id="t1_div" class="collapse">
+    <table id="books_table" class="table table-striped table-dark text-center">
+        <thead>
+            <tr>
+                <th></th>
+                <th><span class="mdate"></span><br> Mon {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
+                <th><span class="tdate"></span><br> Tue {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
+                <th><br><span class="wdate"></span><br> Wed {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
+                <th><span class="thdate"></span><br> Thur {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
+                <th><span class="fdate"></span><br> Fri {{#unless manager}}<a href="#popup_trigger">&#x270E;</a>{{/unless}}</th>
+                <th>Actual <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th>Target <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th><span id="weekly_date"></span><br> Difference <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th>Actual <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th>Target <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+                <th><span id="ytd_date"></span><br> Difference <!--{{#if manager}}<a href="#popup_trigger">&#x270E;</a>{{/if}}--></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!--<tr>
+                <select id="table_sel" class=" bg-dark text-white text-center col-sm-1 type_sel" style="margin-left:18px; height:28px;">
+                <option value="1">Table1</option>
+                <option value="2">Table2</option>
+            </select>-->
+                <div class="row" id="t1_headings">
+                    <h4 id="daily" class="offset-sm-3">DAILY</h4>
+                    <h4 id="weekly" class="offset-sm-3">WEEKLY</h4>
+                    <h4 id="ytd" class="offset-sm-2">YTD</h4>
+                </div>
+        </tbody>
+    </table>
+</div>
+
+<!---table2--->
+<button class="btn bg-dark col-md-12 text-white mt-1" style = "font-size:14pt" type="button" data-toggle="collapse" data-target="#t2_div" 
+aria-expanded="false" aria-controls="t2_div">
+    Table 2
+</button>
+<div id="t2_div" class="collapse">
+    <table id="books_table2" class="table table-striped table-dark text-center">
+        <thead>
+            <tr>
+                <th></th>
+                <th><span class="mdate"></span><br> Mon {{#unless manager}}<a href="#t2_edit">&#x270E;</a>{{/unless}}</th>
+                <th><span class="tdate"></span><br> Tue {{#unless manager}}<a href="#t2_edit">&#x270E;</a>{{/unless}}</th>
+                <th><br><span class="wdate"></span><br> Wed {{#unless manager}}<a href="#t2_edit">&#x270E;</a>{{/unless}}</th>
+                <th><span class="thdate"></span><br> Thur {{#unless manager}}<a href="#t2_edit">&#x270E;</a>{{/unless}}</th>
+                <th><span class="fdate"></span><br> Fri {{#unless manager}}<a href="#t2_edit">&#x270E;</a>{{/unless}}</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+           
+        </tbody>
+    </table>
+</div>

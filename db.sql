@@ -71,7 +71,7 @@ INSERT IGNORE INTO books VALUES(1,5,1008850.0,435545,8,3,10,0,"bsr1");*/
 
 CREATE TABLE IF NOT EXISTS books_weekly
 (
-    ftype_week ENUM('loans','deposits','debit_cards','membership','iTransact','FIP') NOT NULL,
+    ftype_week ENUM('loans','deposits','debit_cards','membership','iTransact','FIP','sold') NOT NULL,
     wweek int(2) NOT NULL,
     weekly_actual float(14,2),
     /*weekly_target float(14,2),*/

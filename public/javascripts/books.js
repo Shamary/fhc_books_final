@@ -31,6 +31,7 @@ $(document).ready(function(e){
 
         
         var labels=["Loans", "Deposits","Debit Cards","Membership","iTransact","FIP","Products Sold"];
+        var labels_t2 = ["Contacts","Leads"];
         
         var actual_labels = {0:"actual_loans", 1:"actual_deposits",2:"actual_cards",3:"actual_membership",4:"actual_itransact",5:"actual_fip"};
         var diff_labels= {0:"diff_loans", 1:"diff_deposits",2:"diff_cards",3:"diff_membership",4:"diff_itransact",5:"diff_fip"};
@@ -49,7 +50,6 @@ $(document).ready(function(e){
             ordering:false,
             dom:"Bfrtip",
             autoWidth:false,
-            /*initComplete: todo_on_load,*/
             buttons:[{extend:"excelHtml5", text:"Save as Excel", className:"exportButton"}, {extend:"pdf", text:"Save as PDF",className:"exportButton"}],
             ajax:{
                 url:"/books_data",
@@ -95,14 +95,14 @@ $(document).ready(function(e){
             ]
         });
         
-        $("th").click(function(){//edit column
+        $("#books_table th").click(function(){//edit column
 
             let pos=$(this).closest("th").index();
             //console.log("pos= "+pos);
             let date= $(this).find("span").text();
             //console.log("date = "+date);
-            $("#date").val(moment(date).format("YYYY-MM-DD"));
-            $("#date, #date_label").css("visibility","visible");
+            /*$("#date").val(moment(date).format("YYYY-MM-DD"));
+            $("#date, #date_label").css("visibility","visible");*/
             if(pos>5)
             {
                 $("#date, #date_label").css("visibility","hidden");
@@ -118,21 +118,25 @@ $(document).ready(function(e){
 
             let data=table.column(pos).data();
 
-            $("#loans").val(data[0]);
-            $("#deposits").val(data[1]);
-            $("#cards").val(data[2]);
-            $("#membership").val(data[3]);
-            $("#iTransact").val(data[4]);
-            $("#fip").val(data[5]);
+            $("#loans").val(data[0] ? data[0] : 0);
+            $("#deposits").val(data[1] ? data[1] : 0);
+            $("#cards").val(data[2] ? data[2] : 0);
+            $("#membership").val(data[3] ? data[3] : 0);
+            $("#iTransact").val(data[4] ? data[4] : 0);
+            $("#fip").val(data[5] ? data[5] : 0);
+            $("#products_sold").val(data[6] ? data[6] : 0);
         });
 
-        /*function edit(event)
-        {
-            let pos=$(event).closest("th").index();
-            console.log("pos= "+pos);
-
-            table.column(pos).data();
-        }*/
+        var table2 = $("#books_table2").DataTable({
+            ordering:false,
+            dom : "Bfrtip",
+            autoWidth:false,
+            buttons : [{extend:"excelHtml5", text:"Save as Excel", className:"exportButton"}, 
+                       {extend:"pdf", text:"Save as PDF",className:"exportButton"}],
+            ajax: {
+                
+            },
+        });
         
         setDate();
         selWeek(table);
@@ -142,7 +146,10 @@ $(document).ready(function(e){
             count=0;
             table.ajax.reload();
         });
-        //setActual();
+
+        $("#table_sel").change(function(){
+            
+        });
 
         function selWeek(table)//select week
         {
@@ -161,11 +168,11 @@ $(document).ready(function(e){
 
         function setDate()
         {
-            $("#mdate").text(getDateRangeOfWeek($("#sel_week").val(),0));
-            $("#tdate").text(getDateRangeOfWeek($("#sel_week").val(),1));
-            $("#wdate").text(getDateRangeOfWeek($("#sel_week").val(),2));
-            $("#thdate").text(getDateRangeOfWeek($("#sel_week").val(),3));
-            $("#fdate,#weekly_date").text(getDateRangeOfWeek($("#sel_week").val(),4));
+            $(".mdate").text(getDateRangeOfWeek($("#sel_week").val(),0));
+            $(".tdate").text(getDateRangeOfWeek($("#sel_week").val(),1));
+            $(".wdate").text(getDateRangeOfWeek($("#sel_week").val(),2));
+            $(".thdate").text(getDateRangeOfWeek($("#sel_week").val(),3));
+            $(".fdate,#weekly_date").text(getDateRangeOfWeek($("#sel_week").val(),4));
         }
 
         function selBSR()
@@ -174,77 +181,6 @@ $(document).ready(function(e){
                 table.ajax.url().load();
             });
             
-        }
-
-        function todo_on_load()
-        {
-            setActual();
-            setDiff();
-            update_auto_db();
-        }
-
-        function setActual()
-        {
-            let i=0;
-            let j=1;
-            let sum=0;
-
-            for(i=0;i<6;i++)
-            {
-                for(j=1;j<6;j++)
-                {
-                    //console.log("cell j: "+j);
-                    if(table.cell(i,j).data())
-                    {
-                        sum+= parseFloat(table.cell(i,j).data());
-                    }
-                }
-                //console.log("sum = "+sum);
-
-                table.cell(i,j).data(sum);
-                sum=0;
-            }
-
-            
-        }
-
-        function setDiff(ytd)
-        {
-            if(ytd)
-            {
-
-            }
-            else
-            {
-                let diff=0;
-                let i=0;
-
-                for(i=0;i<6;i++)
-                {
-                    diff=parseFloat(table.cell(i,7).data() - table.cell(i,6).data());
-                    table.cell(i,8).data(diff);
-                }
-            }
-        }
-
-        function update_auto_db()
-        {
-            let w_data = {};
-            let i=0;
-
-            for(i=0;i<6;i++)
-            {
-                w_data[actual_labels[i]]=table.cell(i,6).data();
-                w_data[diff_labels[i]]=table.cell(i,8).data();
-            }
-            w_data["type"]=2;
-            w_data["week"]=$("#sel_week").val();
-
-            console.log("HERE: "+JSON.stringify(w_data));
-
-            $.post("/update_auto",w_data,function(data){
-                console.log("success");
-            });
         }
     }
     

@@ -56,7 +56,7 @@ var runAction=function(result,action,type)
             return result;
         }
 
-        let data = {loans:null,deposits:null,debit_cards:null,membership:null,iTransact:null,FIP:null};
+        let data = {loans:null,deposits:null,debit_cards:null,membership:null,iTransact:null,FIP:null,sold:null};
 
         if(type==2)
         {
@@ -65,17 +65,21 @@ var runAction=function(result,action,type)
                    cards:{weekly_actual: null, weekly_target:null,weekly_difference:null},
                    members:{weekly_actual: null, weekly_target:null,weekly_difference:null},
                    itransact:{weekly_actual: null, weekly_target:null,weekly_difference:null},
-                   fip:{weekly_actual: null, weekly_target:null,weekly_difference:null}};
+                   fip:{weekly_actual: null, weekly_target:null,weekly_difference:null},
+                   sold:{weekly_actual:null}};
             
             if(result[getType(result,"loans")])
             {
                 let lpos= getType(result,"loans"), dpos=getType(result,"deposits"), cpos=getType(result,"debit_cards"), 
-                    mpos=getType(result,"membership"), ipos=getType(result,"iTransact"),fpos=getType(result,"FIP");
+                    mpos=getType(result,"membership"), ipos=getType(result,"iTransact"),fpos=getType(result,"FIP"),
+                    spos=getType(result,"sold");
                 
                 let lpos_t= getType(result,"loans",false,true,1), dpos_t=getType(result,"deposits",false,true,1), 
                     cpos_t=getType(result,"debit_cards",false,true,1), mpos_t=getType(result,"membership",false,true,1), 
                     ipos_t=getType(result,"iTransact",false,true,1),fpos_t=getType(result,"FIP",false,true,1);
-                    
+                
+                let sold_weekly = result[spos] == null ? 0 : result[spos].weekly_actual;
+
                 data= {loans:{weekly_actual: result[lpos].weekly_actual, 
                                 weekly_target:result[lpos_t]._target,
                                 weekly_difference:result[lpos].weekly_difference},
@@ -93,7 +97,8 @@ var runAction=function(result,action,type)
                                 weekly_difference:result[ipos].weekly_difference},
                         fip:{weekly_actual: result[fpos].weekly_actual, 
                                 weekly_target:result[fpos_t]._target,
-                                weekly_difference:result[fpos].weekly_difference}};
+                                weekly_difference:result[fpos].weekly_difference},
+                        sold:{weekly_actual: sold_weekly}};
             }
         }
         else if(type==3)
@@ -181,7 +186,11 @@ var handleResult= function(result,week)
 
     {mon:monday.FIP,tue:tuesday.FIP,wed:wednesday.FIP,thur:thursday.FIP,fri:friday.FIP, 
         weekly_actual:weekly.fip.weekly_actual, weekly_target:weekly.fip.weekly_target, weekly_difference:weekly.fip.weekly_difference, 
-        ytd_actual:ytd.fip.ytd_actual, ytd_target:ytd.fip.ytd_target, ytd_difference:ytd.fip.ytd_difference}
+        ytd_actual:ytd.fip.ytd_actual, ytd_target:ytd.fip.ytd_target, ytd_difference:ytd.fip.ytd_difference},
+
+    {mon:monday.sold,tue:tuesday.sold,wed:wednesday.sold,thur:thursday.sold,fri:friday.sold, 
+        weekly_actual:weekly.sold.weekly_actual, weekly_target:null, weekly_difference:null, 
+        ytd_actual:null, ytd_target:null, ytd_difference:null}
     ];
 
     let final=JSON.stringify(merge);
@@ -264,7 +273,7 @@ exports.getTableData = function(req,res)
     console.log("week= "+week);
     var sql=`SELECT * FROM (SELECT * FROM books WHERE user ='${user}' AND week =${week}) b
              LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
-             JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_difference,user from books_ytd) as b3 
+             LEFT JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_difference,user from books_ytd) as b3 
              ON b2.ftype_week = b3.ftype_ytd AND b3.user = b.user
              LEFT JOIN  (SELECT ftype,_target,bsr_name,week_or_eoy FROM targets WHERE bsr_name = '${user}') AS b4 ON b4.bsr_name= b.user
             `;
@@ -274,7 +283,7 @@ exports.getTableData = function(req,res)
         console.log("bsr to view = "+bsr_to_view);
         sql=`SELECT * FROM (SELECT * FROM books WHERE user ='${bsr_to_view}' AND week =${week}) b
              LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
-             JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_difference,user from books_ytd) as b3 
+             LEFT JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_difference,user from books_ytd) as b3 
              ON b2.ftype_week = b3.ftype_ytd AND b3.user = b.user
              LEFT JOIN  (SELECT ftype,_target,bsr_name,week_or_eoy FROM targets WHERE bsr_name = '${bsr_to_view}') AS b4 ON b4.bsr_name= b.user
             `;
@@ -326,7 +335,7 @@ exports.updateTable=function(req,res)
     var sql=`
     SELECT * FROM (SELECT * FROM books WHERE user ='${user}' AND week =${week}) b
     LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
-    JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_difference,user from books_ytd) as b3 
+    LEFT JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_difference,user from books_ytd) as b3 
     ON b2.ftype_week = b3.ftype_ytd AND b3.user = b.user
     LEFT JOIN  (SELECT ftype,_target,bsr_name,week_or_eoy FROM targets WHERE bsr_name = '${user}') AS b4 ON b4.bsr_name= b.user`;
 
@@ -334,7 +343,7 @@ exports.updateTable=function(req,res)
     {
         sql=`SELECT * FROM (SELECT * FROM books WHERE user ='${bsr_to_view}' AND week =${week}) b
              LEFT JOIN books_weekly b2 ON b2.wweek=b.week AND b2.user=b.user
-             JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_difference,user from books_ytd) as b3 
+             LEFT JOIN (SELECT ftype_ytd,yweek,ytd_actual,ytd_difference,user from books_ytd) as b3 
              ON b2.ftype_week = b3.ftype_ytd AND b3.user = b.user
              LEFT JOIN  (SELECT ftype,_target,bsr_name,week_or_eoy FROM targets WHERE bsr_name = '${bsr_to_view}') AS b4 ON b4.bsr_name= b.user
             `;
@@ -361,43 +370,6 @@ exports.updateTable=function(req,res)
     });
 }
 
-/*exports.updateDateHeading=function(req,res)
-{
-    let week=req.body.week;
-    //console.log("week heading= "+week);
-    
-    let mdate= "";
-    let tdate="";
-    let wdate="";
-    let thdate="";
-    let fdate="";
-
-    sql="SELECT * from books WHERE week="+week;
-    db.query(sql,function(err,result){
-        if(err)
-        {
-            throw err;
-        }
-
-        let local_res={mdate:"",tdate:"",wdate:"",thdate:"",fdate:""};
-
-        //if(result.length>0)
-        //{
-        mdate= runAction(result[getDay(result,1)],date.format);
-        tdate=runAction(result[getDay(result,2)],date.format);
-        wdate=runAction(result[getDay(result,3)],date.format);
-        thdate=runAction(result[getDay(result,4)],date.format);
-        fdate=runAction(result[getDay(result,5)],date.format);
-
-        local_res={mdate:mdate,tdate:tdate,wdate:wdate,thdate:thdate,fdate:fdate};
-
-            //res.status(200).send(local_res);
-        //}
-
-        //res.status(200).send(local_res);
-        res.json(local_res);
-    });
-}*/
 
 exports.updateDB=function(req,res)
 {
@@ -418,116 +390,15 @@ exports.updateDB=function(req,res)
 
     let user = req.session.user;
 
-    all_sql={0: `SELECT * FROM books WHERE day = ${day} AND week = ${week} AND user= '${user}'`,
-             2: `SELECT weekly_target FROM books_weekly WHERE wweek = ${week} AND user= '${user}'`,
-             5: `SELECT ytd_target FROM books_ytd WHERE user= '${user}'`};
+    let sql = `CALL add_to_books('${user}',${week},${day},${loans},${deposits},${cards},${membership},${iTransact},${FIP},${products_sold})`;
 
-    let sql="SELECT * FROM books WHERE day = "+day+" AND week = "+week;
-    sql=all_sql[rtype];
-
-    db.query(sql,function(err,result){
+    db.query(sql,function(err){
         if(err)
         {
             throw err;
         }
 
-        if(result.length>0)
-        {
-            let values=[];
-            if(rtype==0)
-            {
-                sql= `UPDATE books SET loans = ${loans},deposits= ${deposits},debit_cards=${cards},membership= ${membership}
-                ,iTransact=${iTransact},FIP=${FIP} WHERE week = ${week} AND day = ${day} AND user = '${user}';`;
-            }
-            else 
-            {
-                let table="", cols=[];
-
-                if(rtype==WEEKLY_TARGET)
-                {
-                    table="books_weekly";
-                    cols[0]="ftype_week";
-                    cols[1]= "weekly_target";
-                    cols[2]= "wweek";                    
-                }
-                if(rtype==YTD_TARGET)
-                {
-                    table="books_ytd";
-                    cols[0]="ftype_ytd";
-                    cols[1]= "ytd_target";
-                    cols[2]= "yweek";                    
-                }
-                
-                sql= `UPDATE ${table} SET ${cols[1]} = ${loans} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'loans' AND user= '${user}';
-                     UPDATE ${table} SET ${cols[1]} = ${deposits} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'deposits' AND user= '${user}';
-                     UPDATE ${table} SET ${cols[1]} = ${cards} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'debit_cards' AND user= '${user}';
-                     UPDATE ${table} SET ${cols[1]} = ${membership} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'membership' AND user= '${user}';
-                     UPDATE ${table} SET ${cols[1]} = ${iTransact} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'iTransact' AND user= '${user}';
-                     UPDATE ${table} SET ${cols[1]} = ${FIP} WHERE ${cols[2]} = ${week} AND ${cols[0]} = 'FIP' AND user= '${user}';`;
-
-                /*sql= `UPDATE ${table} SET ${cols[1]} = ? WHERE week = ? AND ${cols[0]} = ?`;
-
-                //values=[['loans',loans],['deposits',deposits],['debit_cards',cards],['membership',membership],['iTransact',iTransact],['FIP',FIP]];
-                values=[[loans,week,'loans']];*/
-            }
-            
-            sql+=`CALL update_weekly_auto(${week},'${user}')`;
-
-            db.query(sql/*,values*/,function(err){
-                if(err)
-                {
-                    throw err;
-                }
-
-                res.redirect("/");
-            });
-        }
-        else
-        {
-            let values=[];
-
-            sql= `INSERT INTO books(week,day,loans,deposits,debit_cards,membership,iTransact,FIP,user) VALUES ?`;
-            values=[[week,day,loans,deposits,cards,membership,iTransact,FIP,user]];
-
-            if(rtype>0)
-            {
-                let table="", cols=[]; 
-
-                if(rtype==WEEKLY_TARGET)
-                {
-                    table="books_weekly";
-                    cols[0]="ftype_week";
-                    cols[1]="wweek";
-                    cols[2]="weekly_target";
-                }
-                if(rtype==YTD_TARGET)
-                {
-                    table="books_ytd";
-                    cols[0]="ftype_ytd";
-                    cols[1]="yweek";
-                    cols[2]="ytd_target";
-                }
-
-                sql= `INSERT INTO ${table}(${cols[0]},${cols[1]},${cols[2]},user) VALUES ('loans',${week},${loans},'${user}'),
-                     ('deposits',${week},${deposits},'${user}'),
-                     ('debit_cards',${week},${cards},'${user}'),
-                     ('membership',${week},${membership},'${user}'),
-                     ('iTransact',${week},${iTransact},'${user}'),
-                     ('FIP',${week},${FIP},'${user}')`;
-                values=[[]];
-            }
-
-            sql+=`; CALL update_weekly_auto(${week},'${user}')`;
-
-            db.query(sql,[values],function(err){
-                if(err)
-                {
-                    throw err;
-                }
-
-                res.redirect("/");
-            });
-        }
+        res.redirect("/");
     });
 }
 

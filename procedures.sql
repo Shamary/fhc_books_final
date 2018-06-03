@@ -19,6 +19,8 @@ DROP PROCEDURE IF EXISTS sold_weekly_actual;
 
 DROP PROCEDURE IF EXISTS add_to_books;
 
+DROP PROCEDURE IF EXISTS update_table2;
+
 /****************FOR BOOKS***************/
 DELIMITER //
 CREATE PROCEDURE add_to_books
@@ -26,13 +28,13 @@ CREATE PROCEDURE add_to_books
     IN _bsr varchar(30),
     IN _week int(2), 
     IN _day int(1),
-    IN _loans float(14,2) NOT NULL,
-    IN _deposits float(14,2) NOT NULL,
-    IN _cards int NOT NULL,
-    IN _membership int NOT NULL,
-    IN _iTransact int NOT NULL,
-    IN _FIP int NOT NULL,
-    IN _sold float(8,2) NOT NULL
+    IN _loans float(14,2),
+    IN _deposits float(14,2),
+    IN _cards int,
+    IN _membership int,
+    IN _iTransact int,
+    IN _FIP int,
+    IN _sold float(8,2)
 )
 BEGIN
 
@@ -45,7 +47,7 @@ BEGIN
     END IF;
 
     CALL update_weekly_auto(_week,_bsr);
-END;
+END //
 DELIMITER ;
 
 /****************UPDATES********************/
@@ -54,7 +56,8 @@ CREATE PROCEDURE
 update_weekly_auto(IN _week int(2),IN _user varchar(30))
 BEGIN
     INSERT IGNORE INTO books_weekly(ftype_week,wweek,user) VALUES('loans',_week,_user), ('deposits',_week,_user),('debit_cards',_week,_user),
-                                                            ('membership',_week,_user),('iTransact',_week,_user), ('FIP',_week,_user);
+                                                            ('membership',_week,_user),('iTransact',_week,_user), ('FIP',_week,_user),
+                                                            ('sold',_week,_user);
 
     UPDATE books_weekly SET weekly_actual = (SELECT SUM(loans) FROM books WHERE week=_week AND user=_user) 
     WHERE ftype_week= 'loans' AND user=_user AND wweek=_week;
@@ -73,6 +76,9 @@ BEGIN
 
     UPDATE books_weekly SET weekly_actual = (SELECT SUM(FIP) FROM books WHERE week=_week AND user=_user) 
     WHERE ftype_week= 'FIP' AND user=_user AND wweek=_week;
+
+    UPDATE books_weekly SET weekly_actual = (SELECT SUM(sold) FROM books WHERE week=_week AND user=_user) 
+    WHERE ftype_week= 'sold' AND user=_user AND wweek=_week;
 
     CALL update_diff(_user,_week,'loans');
     CALL update_diff(_user,_week,'deposits');
@@ -251,6 +257,20 @@ BEGIN
 END //
 DELIMITER ;
 
+/************for contacts,leads*************/
+
+DELIMITER //
+CREATE PROCEDURE update_table2(IN _bsr varchar(30), IN _week int(2), IN _day int(1), IN _contacts float(7,2), IN _leads float(7,2))
+BEGIN
+    IF NOT EXISTS (SELECT bsr FROM books2 WHERE bsr = _bsr AND week = _week AND day = _day) THEN
+        INSERT INTO books2 VALUES (_bsr,_day,_week,'contacts',_contacts),(_bsr,_day,_week,'leads',_contacts);
+    ELSE
+        UPDATE books2 SET val = _contacts WHERE bsr = _bsr AND week = _week AND day = _day AND info_for = 'contacts';
+        UPDATE books2 SET val = _leads WHERE bsr = _bsr AND week = _week AND day = _day AND info_for = 'leads'; 
+    END IF;
+END //
+DELIMITER ;
+
 /************For products sold***************
 
 DELIMITER //
@@ -280,5 +300,5 @@ END //
 
 DELIMITER ;
 
-/******************CALLS***************/
-CALL update_weekly_auto(1,"bsr1");
+/******************CALLS***************
+CALL update_weekly_auto(1,"bsr1");*/

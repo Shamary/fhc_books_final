@@ -69,7 +69,7 @@ a {
   bottom: 0;
   right: 0;
   background:#000000b3;
-  transition: opacity 500ms;
+  transition: opacity 400ms;
   opacity: 0;
 }
 
@@ -91,6 +91,16 @@ a {
 .user_popup{
   width: 350px; 
   height: 430px;
+  top:20%;
+  left:38%;
+  transition: all 5s ease-in-out;
+  position: relative;
+}
+
+.t2_popup
+{
+  width: 300px; 
+  height: 300px;
   top:20%;
   left:38%;
   transition: all 5s ease-in-out;
@@ -235,4 +245,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .user_div label{
   font-size: 21pt;
   font-weight: bold;
+}
+
+#t1_div,#t2_div{
+  border:2px solid #343a40;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
 }
