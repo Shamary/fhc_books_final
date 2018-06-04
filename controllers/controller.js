@@ -1,4 +1,3 @@
-var express = require('express');
 var db=require("../config/db");
 var date= require("date-and-time");
 
@@ -146,11 +145,6 @@ var runAction=function(result,action,type)
     
 }
 
-var handle_auto_cols = function()
-{
-    
-}
-
 var handleResult= function(result,week)
 {
     let monday=runAction(result[getDay(result,1)]);//result[getDay(result,1)];
@@ -255,7 +249,8 @@ exports.homePage=function(req,res)
         /*res.render('home', { title: 'Books', user:user,weeks:weeks, mdate:mdate, tdate:tdate, wdate:wdate, 
         thdate:thdate, fdate:fdate , manager:position, my_bsrs: bsr_names});*/
 
-        res.render('home', { title: 'Books', user:user,weeks:weeks,manager:position,my_bsrs: bsr_names});
+        res.render('home', { title: 'Books', user:user,weeks:weeks,manager:position,my_bsrs: bsr_names, 
+                             table_name1:process.env.table_name1, table_name2:process.env.table_name2, show_t1:req.session.mod_t1});
     });
     
 }
@@ -320,15 +315,6 @@ exports.updateTable=function(req,res)
 
     let position= req.session.position == "manager";
 
-    let add_on= ``;
-    if(position)
-    {
-        add_on= ``;
-    }
-    else
-    {
-        add_on= `CALL update_weekly_auto(1,'${user}');`;
-    }
     //console.log("week= "+week);
 
     //var sql="SELECT loans,deposits,debit_cards,membership,iTransact,FIP,day FROM books WHERE week="+week+"";
@@ -398,6 +384,7 @@ exports.updateDB=function(req,res)
             throw err;
         }
 
+        req.session.mod_t1=true;
         res.redirect("/");
     });
 }

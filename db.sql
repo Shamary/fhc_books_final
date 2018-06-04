@@ -95,6 +95,18 @@ CREATE TABLE IF NOT EXISTS books_ytd
     CONSTRAINT FOREIGN KEY(yweek) references books(week) ON DELETE CASCADE*/
 ) ENGINE = InnoDB;
 
+CREATE TABLE IF NOT EXISTS books2
+(
+    bsr varchar(30) NOT NULL,
+    day int(1) NOT NULL,
+    week int(1) NOT NULL,
+    info_for ENUM('contacts','leads') NOT NULL,
+    val float(7,2) NOT NULL,
+    /*total float(10,2) NOT NULL DEFAULT 0,*/
+    /*PRIMARY KEY (bsr,week,day),*/
+    CONSTRAINT FOREIGN KEY (bsr) REFERENCES manager_table(bsr_name) ON DELETE CASCADE
+) ENGINE = InnoDB;
+
 /*
 CREATE TABLE IF NOT EXISTS products_sold
 (

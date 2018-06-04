@@ -41,7 +41,7 @@ $(document).ready(function(e){
 
         var type = {6:WEEKLY_ACTUAL,7:WEEKLY_TARGET,8:WEEKLY_DIFF,9:YTD_ACTUAL,10:YTD_TARGET,11:YTD_DIFF};
 
-        var count=0;
+        var count=0, count2 = 0;
         
         var week=1;
 
@@ -133,29 +133,88 @@ $(document).ready(function(e){
             autoWidth:false,
             buttons : [{extend:"excelHtml5", text:"Save as Excel", className:"exportButton"}, 
                        {extend:"pdf", text:"Save as PDF",className:"exportButton"}],
-            ajax: {
+            initComplete: function(settings,json)
+            {
+                //sum row
+                let api= this.api();
+                let r1 = api.row(0).data();
+                let r2 = api.row(1).data();
+                //console.log(JSON.stringify(json));
+                //json=JSON.stringify(json);
+                //console.log("mon = "+r1.mon);
+                let c_sum =fn(r1.mon)+fn(r1.tue)+fn(r1.wed)+fn(r1.thur)+fn(r1.fri);
+                let l_sum =fn(r2.mon)+fn(r2.tue)+fn(r2.wed)+fn(r2.thur)+fn(r2.fri);
+
+                api.cell(0,6).data(c_sum).draw(); 
+                api.cell(1,6).data(l_sum).draw();
                 
+                //let sum = r_data[1]+r_data[2]+r_data[3]+r_data[4]+r_data[5];
             },
+            ajax: {
+                url : "/get_table2",
+                type: "POST",
+                data : function(){
+                    let _data={week:$("#sel_week").val(), bsr_to_view: $("#sel_bsr").val()};
+                    return _data;
+                },
+                datatSrc : ''
+            },
+            columns : [
+                {
+                    data:null,
+                    render: function(o)
+                    {
+                        return '<span>'+labels_t2[count2++]+'</span>';
+                    }
+                },
+                {data:'mon'},
+                {data:'tue'},
+                {data:'wed'},
+                {data:'thur'},
+                {data:'fri'},
+                {
+                   data:'total'
+                }
+            ]
         });
         
+        $("#books_table2 th").click(function(){//edit column
+
+            let pos=$(this).closest("th").index();
+            let date= $(this).find("span").text();
+
+            $("#t2_day_head").text(days[pos]);
+            $("#t2_date").text($(this).find("span").text());
+
+            $("#t2_day").val(pos);
+            $("#t2_week").val($("#sel_week").val());
+
+            let data=table2.column(pos).data();
+
+            $("#contacts").val(data[0] ? data[0] : 0);
+            $("#leads").val(data[1] ? data[1] : 0);
+        });
+
         setDate();
         selWeek(table);
         removeCpy("#sel_week");
 
         $("#sel_bsr").change(function(){
             count=0;
+            count2=0;
             table.ajax.reload();
-        });
-
-        $("#table_sel").change(function(){
-            
+            table2.ajax.reload();
         });
 
         function selWeek(table)//select week
         {
             $("#sel_week").change(function(){
                 count=0;
-                table.ajax.url("/books_update").load();
+                count2=0;
+
+                //table.ajax.url("/books_update").load();
+                table.ajax.reload();
+                table2.ajax.reload();
                 setDate();
                 removeCpy("#sel_week");
             });
@@ -179,11 +238,16 @@ $(document).ready(function(e){
         {
             $("#sel_bsr").change(function(){
                 table.ajax.url().load();
+                table2.ajax.url().load();
             });
             
         }
     }
     
+    $(".btn_link").click(function(e){
+        $(".panel_div").collapse("toggle");
+    });
+
     $("#add_user_btn").click(function(){
         $.post("/register",$("#add_user_form").serialize(),function(data){
             console.log("data: "+data);
@@ -207,6 +271,11 @@ $(document).ready(function(e){
                 usedNames[this.text] = this.value;
             }
         });
+    }
+
+    function fn(val)//filter out nulls
+    {
+        return val == null ? 0 : val;
     }
 
 });

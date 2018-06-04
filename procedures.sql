@@ -263,13 +263,22 @@ DELIMITER //
 CREATE PROCEDURE update_table2(IN _bsr varchar(30), IN _week int(2), IN _day int(1), IN _contacts float(7,2), IN _leads float(7,2))
 BEGIN
     IF NOT EXISTS (SELECT bsr FROM books2 WHERE bsr = _bsr AND week = _week AND day = _day) THEN
-        INSERT INTO books2 VALUES (_bsr,_day,_week,'contacts',_contacts),(_bsr,_day,_week,'leads',_contacts);
+        INSERT INTO books2 VALUES (_bsr,_day,_week,'contacts',_contacts),(_bsr,_day,_week,'leads',_leads);
     ELSE
         UPDATE books2 SET val = _contacts WHERE bsr = _bsr AND week = _week AND day = _day AND info_for = 'contacts';
         UPDATE books2 SET val = _leads WHERE bsr = _bsr AND week = _week AND day = _day AND info_for = 'leads'; 
     END IF;
 END //
 DELIMITER ;
+
+/*
+DELIMITER //
+CREATE PROCEDURE set_t2_total (IN _bsr varchar(30), IN _week int(2))
+BEGIN
+    
+
+END //
+DELIMITER ;*/ 
 
 /************For products sold***************
 

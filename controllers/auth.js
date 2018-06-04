@@ -45,6 +45,7 @@ exports.login = function(req,res)
         {
             req.session.user=_username;
             req.session.position = result[i].position;
+            req.session.mod_t1=true;
 
             res.redirect("/");
         }
@@ -120,6 +121,7 @@ exports.logout = function(req,res)
 {
     req.session.user=null;
     req.session.position=null;
+    req.session.mod_t1=null;
 
     res.status(200).send("OK");
 }

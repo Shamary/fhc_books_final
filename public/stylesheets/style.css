@@ -100,7 +100,7 @@ a {
 .t2_popup
 {
   width: 300px; 
-  height: 300px;
+  height: 250px;
   top:20%;
   left:38%;
   transition: all 5s ease-in-out;
@@ -192,7 +192,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 #option{
   width: 120px;
-  
+  z-index: 2;
   position: fixed;
   top:0;
   right:0;
@@ -251,4 +251,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border:2px solid #343a40;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
+}
+
+.panel_div{
+  padding-top: 10px;
 }
