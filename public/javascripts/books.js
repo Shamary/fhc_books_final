@@ -133,7 +133,7 @@ $(document).ready(function(e){
             autoWidth:false,
             buttons : [{extend:"excelHtml5", text:"Save as Excel", className:"exportButton"}, 
                        {extend:"pdf", text:"Save as PDF",className:"exportButton"}],
-            initComplete: function(settings,json)
+            initComplete: function()
             {
                 //sum row
                 let api= this.api();
@@ -141,7 +141,7 @@ $(document).ready(function(e){
                 let r2 = api.row(1).data();
                 //console.log(JSON.stringify(json));
                 //json=JSON.stringify(json);
-                //console.log("mon = "+r1.mon);
+                console.log("mon = "+r1.mon);
                 let c_sum =fn(r1.mon)+fn(r1.tue)+fn(r1.wed)+fn(r1.thur)+fn(r1.fri);
                 let l_sum =fn(r2.mon)+fn(r2.tue)+fn(r2.wed)+fn(r2.thur)+fn(r2.fri);
 
@@ -206,6 +206,24 @@ $(document).ready(function(e){
             table2.ajax.reload();
         });
 
+        function sum_days()
+            {
+                //sum row
+                let api= table2;
+                let r1 = api.row(0).data();
+                let r2 = api.row(1).data();
+                //console.log(JSON.stringify(json));
+                //json=JSON.stringify(json);
+                //console.log("mon = "+r1.mon);
+                let c_sum =fn(r1.mon)+fn(r1.tue)+fn(r1.wed)+fn(r1.thur)+fn(r1.fri);
+                let l_sum =fn(r2.mon)+fn(r2.tue)+fn(r2.wed)+fn(r2.thur)+fn(r2.fri);
+
+                api.cell(0,6).data(c_sum).draw(); 
+                api.cell(1,6).data(l_sum).draw();
+                
+                //let sum = r_data[1]+r_data[2]+r_data[3]+r_data[4]+r_data[5];
+            }
+
         function selWeek(table)//select week
         {
             $("#sel_week").change(function(){
@@ -214,7 +232,7 @@ $(document).ready(function(e){
 
                 //table.ajax.url("/books_update").load();
                 table.ajax.reload();
-                table2.ajax.reload();
+                table2.ajax.reload(sum_days);
                 setDate();
                 removeCpy("#sel_week");
             });

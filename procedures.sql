@@ -21,6 +21,8 @@ DROP PROCEDURE IF EXISTS add_to_books;
 
 DROP PROCEDURE IF EXISTS update_table2;
 
+DROP PROCEDURE IF EXISTS get_manager_table;
+
 /****************FOR BOOKS***************/
 DELIMITER //
 CREATE PROCEDURE add_to_books
@@ -204,14 +206,16 @@ BEGIN
 
     SELECT * INTO w_or_y FROM (SELECT IF(_week_or_eoy = 1,2,1) as a) b;
 
-    INSERT INTO manager_table (manager,bsr_name,loans,deposits,debit_cards,membership,iTransact,FIP,week_or_eoy)
-    VALUES (_manager,bsr,_loans,_deposits,_debit_cards,_membership,_iTransact,_FIP,_week_or_eoy);
+    /*INSERT INTO manager_table (manager,bsr_name,loans,deposits,debit_cards,membership,iTransact,FIP,week_or_eoy)
+    VALUES (_manager,bsr,_loans,_deposits,_debit_cards,_membership,_iTransact,_FIP,_week_or_eoy);*/
+
+    INSERT INTO manager_table (manager,bsr_name) VALUES (_manager,bsr);
 
     SELECT branch INTO vbranch FROM user WHERE _username = bsr;
     SELECT position INTO _position FROM user WHERE _username = bsr;
 
     UPDATE manager_table SET branch = vbranch/*(SELECT branch FROM user WHERE _username = bsr)*/, 
-           position = _position/*(SELECT position FROM user WHERE _username = bsr )*/ WHERE bsr_name = bsr AND week_or_eoy = _week_or_eoy;
+           position = _position/*(SELECT position FROM user WHERE _username = bsr )*/ WHERE bsr_name = bsr;
 
     INSERT INTO targets(manager,bsr_name,week_or_eoy,ftype,_target) VALUES (_manager,bsr,_week_or_eoy,'loans',_loans),
         (_manager,bsr,_week_or_eoy,'deposits',_deposits),(_manager,bsr,_week_or_eoy,'debit_cards',_debit_cards),
@@ -227,8 +231,11 @@ DELIMITER //
 CREATE PROCEDURE
 after_assign(IN _manager varchar(30), IN _bsr varchar(30),_week_or_eoy int(1),IN _branch int,IN _position ENUM('bsr'))
 BEGIN
-    INSERT IGNORE INTO manager_table (manager,branch,bsr_name,position,loans,deposits,debit_cards,membership,iTransact,FIP,week_or_eoy)
-    VALUES (_manager,_branch,_bsr,_position,0,0,0,0,0,0,_week_or_eoy);
+    /*INSERT IGNORE INTO manager_table (manager,branch,bsr_name,position,loans,deposits,debit_cards,membership,iTransact,FIP,week_or_eoy)
+    VALUES (_manager,_branch,_bsr,_position,0,0,0,0,0,0,_week_or_eoy);*/
+
+    INSERT IGNORE INTO manager_table (manager,branch,bsr_name,position)
+    VALUES (_manager,_branch,_bsr,_position);
 
     INSERT IGNORE INTO targets (manager,bsr_name,week_or_eoy,ftype,_target) VALUES (_manager,_bsr,_week_or_eoy,'loans',0),
     (_manager,_bsr,_week_or_eoy,'deposits',0),(_manager,_bsr,_week_or_eoy,'debit_cards',0),(_manager,_bsr,_week_or_eoy,'membership',0),
@@ -242,9 +249,9 @@ CREATE PROCEDURE
 update_targets(IN _manager varchar(30), IN _bsr varchar(30),IN _loans float(14,2),
                IN _deposits float(14,2),IN _debit_cards int,IN _membership int,IN _iTransact int,IN _FIP int,_week_or_eoy int(1))
 BEGIN
-    UPDATE manager_table SET loans = _loans, deposits = _deposits, debit_cards = _debit_cards, 
+    /*UPDATE manager_table SET loans = _loans, deposits = _deposits, debit_cards = _debit_cards, 
            membership = _membership, iTransact = _iTransact, FIP = _FIP
-    WHERE manager = _manager AND bsr_name = _bsr AND week_or_eoy = _week_or_eoy;
+    WHERE manager = _manager AND bsr_name = _bsr AND week_or_eoy = _week_or_eoy;*/
     
     UPDATE targets SET _target = _loans WHERE ftype = 'loans' AND bsr_name = _bsr AND week_or_eoy = _week_or_eoy;
     UPDATE targets SET _target = _deposits WHERE ftype = 'deposits' AND bsr_name = _bsr AND week_or_eoy = _week_or_eoy;
@@ -254,6 +261,32 @@ BEGIN
     UPDATE targets SET _target = _FIP WHERE ftype = 'FIP' AND bsr_name = _bsr AND week_or_eoy = _week_or_eoy;
 
     CALL update_weekly_auto(1,_bsr);
+END //
+DELIMITER ;
+
+/*************************CREATE MANAGER TABLE*********/
+DELIMITER //
+CREATE PROCEDURE get_manager_table(IN _manager varchar(30),_week_or_eoy int(1))
+BEGIN
+    SELECT distinct branch,bsr_name,position,loans,deposits,debit_cards,membership,iTransact,FIP FROM( 
+    SELECT * FROM (SELECT manager,bsr_name,week_or_eoy,_target as loans FROM targets WHERE ftype = 'loans') a JOIN 
+
+    (SELECT manager as manager2,week_or_eoy as week_or_eoy2,bsr_name as bsr_name2,_target as deposits FROM targets WHERE ftype = 'deposits') b  
+    ON a.manager = b.manager2 AND a.week_or_eoy = b.week_or_eoy2 AND a.bsr_name = b.bsr_name2 JOIN 
+
+    (SELECT manager as manager3,week_or_eoy as week_or_eoy3,bsr_name as bsr_name3,_target as debit_cards FROM targets WHERE ftype = 'debit_cards') c  
+    ON a.manager = c.manager3 AND a.week_or_eoy = c.week_or_eoy3 AND a.bsr_name = c.bsr_name3 JOIN 
+
+    (SELECT manager as manager4,week_or_eoy as week_or_eoy4,bsr_name as bsr_name4,_target as membership FROM targets WHERE ftype = 'membership') d  
+    ON a.manager = d.manager4 AND a.week_or_eoy = d.week_or_eoy4 AND a.bsr_name = d.bsr_name4 JOIN 
+
+    (SELECT manager as manager5,week_or_eoy as week_or_eoy5,bsr_name as bsr_name5,_target as iTransact FROM targets WHERE ftype = 'iTransact') e  
+    ON a.manager = e.manager5 AND a.week_or_eoy = e.week_or_eoy5 AND a.bsr_name = e.bsr_name5 JOIN 
+
+    (SELECT manager as manager6,week_or_eoy as week_or_eoy6,bsr_name as bsr_name6,_target as FIP FROM targets WHERE ftype = 'FIP') f  
+    ON a.manager = f.manager6 AND a.week_or_eoy = f.week_or_eoy6 AND a.bsr_name = f.bsr_name6
+
+    JOIN (SELECT branch,position,bsr_name as bsr_name7 from manager_table) g ON g.bsr_name7 = a.bsr_name) h WHERE manager = _manager AND week_or_eoy = _week_or_eoy;
 END //
 DELIMITER ;
 

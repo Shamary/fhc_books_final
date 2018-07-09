@@ -24,12 +24,12 @@ CREATE TABLE IF NOT EXISTS manager_table
     branch int,
     bsr_name varchar(30) NOT NULL,
     position ENUM('bsr'),
-    loans float(14,2) NOT NULL,
+    /*loans float(14,2) NOT NULL,
     deposits float(14,2) NOT NULL,
     debit_cards int NOT NULL,
     membership int NOT NULL,
     iTransact int NOT NULL,
-    FIP int NOT NULL,
+    FIP int NOT NULL,*/
     week_or_eoy int(1),
     PRIMARY KEY(manager,bsr_name,week_or_eoy),
     CONSTRAINT FOREIGN KEY (bsr_name) REFERENCES user(_username) ON DELETE CASCADE
